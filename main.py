@@ -243,24 +243,32 @@ def run_flask_server():
     def home():
         return "🤖 Bot is running! UptimeRobot monitoring active."
 
-    port = int(os.environ.get("PORT", 8080))
+    @app.route('/health')
+    def health_check():
+        return "OK", 200
+
+    port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
 
+# ===== ЗАПУСК БОТА И СЕРВЕРА =====
 def main() -> None:
     if not BOT_TOKEN:
         logger.error("❌ BOT_TOKEN не установлен!")
         return
 
-    # Закомментируйте запуск Flask
-    # server_thread = threading.Thread(target=run_flask_server)
-    # server_thread.daemon = True
-    # server_thread.start()
-    # logger.info(f"🌐 HTTP server running on port {os.environ.get('PORT', 10000)}")
+    # Запускаем HTTP сервер в отдельном потоке
+    server_thread = threading.Thread(target=run_flask_server)
+    server_thread.daemon = True
+    server_thread.start()
+    logger.info(f"🌐 HTTP server running on port {os.environ.get('PORT', 10000)}")
 
-    # Создаем и запускаем бота
+    # Создаем и запускаем бота в основном потоке
     application = Application.builder().token(BOT_TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_handler))
 
     logger.info("🤖 Бот запущен! Ожидание сообщений...")
     application.run_polling(drop_pending_updates=True)
+
+if __name__ == "__main__":
+    main()
