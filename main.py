@@ -246,7 +246,6 @@ def run_flask_server():
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
 
-# ===== ЗАПУСК БОТА И СЕРВЕРА =====
 def main() -> None:
     if not BOT_TOKEN:
         logger.error("❌ BOT_TOKEN не установлен!")
@@ -254,17 +253,21 @@ def main() -> None:
 
     # Запускаем HTTP сервер в отдельном потоке
     server_thread = threading.Thread(target=run_flask_server)
-    server_thread.daemon = True  # Демонизируем поток
+    server_thread.daemon = True
     server_thread.start()
-    logger.info(f"🌐 HTTP server running on port {os.environ.get('PORT', 8080)}")
+    logger.info(f"🌐 HTTP server running on port {os.environ.get('PORT', 10000)}")
 
-    # Создаем и запускаем бота в основном потоке
+    # Создаем и запускаем бота
     application = Application.builder().token(BOT_TOKEN).build()
+    
+    # Добавляем обработчики
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_handler))
 
     logger.info("🤖 Бот запущен! Ожидание сообщений...")
-    application.run_polling(drop_pending_updates=True)
-
-if __name__ == "__main__":
-    main()
+    
+    # Запускаем бота с явным указанием использовать текущий event loop
+    application.run_polling(
+        drop_pending_updates=True,
+        close_loop=False  # Важно для работы с Flask в отдельном потоке
+    )
