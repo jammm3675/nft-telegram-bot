@@ -19,7 +19,7 @@ REPLIT_APP_NAME = os.environ.get('REPLIT_APP_NAME', 'nft-telegram-bot')
 # Описания NFT коллекций
 NFT_COLLECTIONS = {
     "NIX": {
-        "image": "blob:https://web.telegram.org/4ba83de2-b2cf-47cc-abbe-4dca8d1971c1",
+        "image": "https://ibb.co/MyCJ8J33",
         "description": (
             "**NIX**\n"
             "by Postmarks: The Jaegers\n\n"
@@ -29,7 +29,7 @@ NFT_COLLECTIONS = {
         )
     },
     "TON POKER": {
-        "image": "ВАШ_FILE_ID_TON_POKER",
+        "image": "https://ibb.co/RTHnvCsr",
         "description": (
             "**Ace of Strength**\n"
             "by Medieval Deck\n\n"
@@ -38,7 +38,7 @@ NFT_COLLECTIONS = {
         )
     },
     "Fool moon": {
-        "image": "ВАШ_FILE_ID_FOOL_MOON",
+        "image": "https://ibb.co/1tvKy4HV",
         "description": (
             "**Fool Moon**\n"
             "by Postmarks: Odds + Ends\n\n"
@@ -49,7 +49,7 @@ NFT_COLLECTIONS = {
         )
     },
     "The League": {
-        "image": "ВАШ_FILE_ID_THE_LEAGUE",
+        "image": "https://ibb.co/gZ20qd68",
         "description": (
             "**The League**\n"
             "by Lost Dogs: The Hint\n\n"
@@ -59,7 +59,7 @@ NFT_COLLECTIONS = {
         )
     },
     "CARTONKI": {
-        "image": "ВАШ_FILE_ID_CARTONKI",
+        "image": "https://ibb.co/JWsYQJwH",
         "description": (
             "**Gift box**\n"
             "by Gems Winter Store\n\n"
