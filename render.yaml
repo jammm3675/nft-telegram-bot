@@ -2,8 +2,9 @@ services:
   - type: web
     name: nft-telegram-bot
     runtime: python
+    pythonVersion: "3.11.10"
     buildCommand: pip install -r requirements.txt
-    startCommand: python main.py
+    startCommand: bash start.sh
     envVars:
       - key: BOT_TOKEN
         value: 7953613164:AAF2sa_5nwE45LCcn-7dB_saJOPnPS_Z0F8
