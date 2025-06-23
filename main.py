@@ -4,10 +4,10 @@ import threading
 import asyncio
 import requests
 from io import BytesIO
-from flask import Flask, Response
+from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
-from telegram.error import TelegramError
+from telegram.error import TelegramError, BadRequest
 
 # Настройка логирования
 logging.basicConfig(
@@ -22,7 +22,7 @@ BOT_TOKEN = os.environ.get('BOT_TOKEN', '7953613164:AAF2sa_5nwE45LCcn-7dB_saJOPn
 # Описания NFT коллекций с ПРЯМЫМИ ссылками на изображения
 NFT_COLLECTIONS = {
     "NIX": {
-        "image": "https://i.ibb.co/MyCJ8J33/NIX.png",  # Исправленная ссылка
+        "image": "https://i.ibb.co/MyCJ8J33/NIX.png",
         "description": (
             "**NIX**\n"
             "by Postmarks: The Jaegers\n\n"
@@ -32,7 +32,7 @@ NFT_COLLECTIONS = {
         )
     },
     "TON POKER": {
-        "image": "https://i.ibb.co/RTHnvCsr/TON-POKER.png",  # Исправленная ссылка
+        "image": "https://i.ibb.co/RTHnvCsr/TON-POKER.png",
         "description": (
             "**Ace of Strength**\n"
             "by Medieval Deck\n\n"
@@ -41,7 +41,7 @@ NFT_COLLECTIONS = {
         )
     },
     "Fool moon": {
-        "image": "https://i.ibb.co/1tvKy4HV/Fool-moon.png",  # Исправленная ссылка
+        "image": "https://i.ibb.co/1tvKy4HV/Fool-moon.png",
         "description": (
             "**Fool Moon**\n"
             "by Postmarks: Odds + Ends\n\n"
@@ -52,7 +52,7 @@ NFT_COLLECTIONS = {
         )
     },
     "The League": {
-        "image": "https://i.ibb.co/gZ20qd68/Lost-Dogs.png",  # Исправленная ссылка
+        "image": "https://i.ibb.co/gZ20qd68/Lost-Dogs.png",
         "description": (
             "**The League**\n"
             "by Lost Dogs: The Hint\n\n"
@@ -62,7 +62,7 @@ NFT_COLLECTIONS = {
         )
     },
     "CARTONKI": {
-        "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",  # Исправленная ссылка
+        "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",
         "description": (
             "**Gift box**\n"
             "by Gems Winter Store\n\n"
@@ -167,8 +167,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         "🌟 **NFTs for sale**\n\n"
         "This bot represents all NFTs that are ready to pass into the hands of a new owner :) \n\n"
         "To avoid scams, transactions are conducted through: @GiftElfRobot \n\n"
-        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️\n\n"
-        "bot by jammm 🐱"
+        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️"
     )
 
     if update.message:
@@ -176,16 +175,33 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     else:
         query = update.callback_query
         await query.answer()
-        await query.edit_message_text(text, reply_markup=main_menu_keyboard(), parse_mode="Markdown")
+        try:
+            await query.edit_message_text(text, reply_markup=main_menu_keyboard(), parse_mode="Markdown")
+        except BadRequest:
+            # Если сообщение не содержит текста (например, это фото), отправляем новое
+            await context.bot.send_message(
+                chat_id=query.message.chat_id,
+                text=text,
+                reply_markup=main_menu_keyboard(),
+                parse_mode="Markdown"
+            )
 
 async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(
-        "🎨 **NFT Collections**\nSelect an NFT to view:",
-        reply_markup=nft_menu_keyboard(),
-        parse_mode="Markdown"
-    )
+    try:
+        await query.edit_message_text(
+            "🎨 **NFT Collections**\nSelect an NFT to view:",
+            reply_markup=nft_menu_keyboard(),
+            parse_mode="Markdown"
+        )
+    except BadRequest:
+        await context.bot.send_message(
+            chat_id=query.message.chat_id,
+            text="🎨 **NFT Collections**\nSelect an NFT to view:",
+            reply_markup=nft_menu_keyboard(),
+            parse_mode="Markdown"
+        )
 
 async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nft_name: str) -> None:
     query = update.callback_query
@@ -199,7 +215,7 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
     logger.info(f"Отправка изображения для {nft_name}: {nft['image']}")
     
     try:
-        # Вариант 1: Отправка по прямой ссылке
+        # Отправляем изображение по прямой ссылке
         await context.bot.send_photo(
             chat_id=chat_id,
             photo=nft['image'],
@@ -209,15 +225,15 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
         )
         
         # Удаляем предыдущее сообщение
-        await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-        logger.info(f"Изображение для {nft_name} успешно отправлено")
+        try:
+            await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+        except BadRequest as e:
+            logger.warning(f"Не удалось удалить сообщение: {e}")
         
     except TelegramError as e:
         logger.error(f"Ошибка при отправке изображения: {e}")
         try:
-            logger.info("Пробуем альтернативный метод загрузки изображения...")
-            
-            # Вариант 2: Скачиваем изображение и отправляем как файл
+            # Скачиваем изображение и отправляем как файл
             response = requests.get(nft['image'])
             response.raise_for_status()
             
@@ -232,15 +248,18 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
                 parse_mode="Markdown"
             )
             
-            await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-            logger.info(f"Изображение для {nft_name} успешно отправлено (альтернативный метод)")
+            try:
+                await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+            except BadRequest as e:
+                logger.warning(f"Не удалось удалить сообщение: {e}")
             
         except Exception as e2:
             logger.error(f"Ошибка при альтернативной отправке изображения: {e2}")
+            # Отправляем текстовое сообщение
             try:
-                # Если не удалось отправить фото, отправляем текстовое сообщение
-                await query.edit_message_text(
-                    text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Image is temporarily unavailable",
+                await context.bot.send_message(
+                    chat_id=chat_id,
+                    text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Изображение временно недоступно",
                     reply_markup=nft_detail_keyboard(nft_name),
                     parse_mode="Markdown"
                 )
@@ -250,11 +269,19 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
 async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(
-        "🎭 **Stickerpacks**\nSelect a sticker collection:",
-        reply_markup=stickers_menu_keyboard(),
-        parse_mode="Markdown"
-    )
+    try:
+        await query.edit_message_text(
+            "🎭 **Stickerpacks**\nSelect a sticker collection:",
+            reply_markup=stickers_menu_keyboard(),
+            parse_mode="Markdown"
+        )
+    except BadRequest:
+        await context.bot.send_message(
+            chat_id=query.message.chat_id,
+            text="🎭 **Stickerpacks**\nSelect a sticker collection:",
+            reply_markup=stickers_menu_keyboard(),
+            parse_mode="Markdown"
+        )
 
 async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, sticker_name: str) -> None:
     query = update.callback_query
@@ -265,11 +292,19 @@ async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     text = f"✨ **{sticker_name}** ✨\n\n{description}\n\nSelect action:"
 
-    await query.edit_message_text(
-        text,
-        reply_markup=sticker_detail_keyboard(sticker_name),
-        parse_mode="Markdown"
-    )
+    try:
+        await query.edit_message_text(
+            text,
+            reply_markup=sticker_detail_keyboard(sticker_name),
+            parse_mode="Markdown"
+        )
+    except BadRequest:
+        await context.bot.send_message(
+            chat_id=query.message.chat_id,
+            text=text,
+            reply_markup=sticker_detail_keyboard(sticker_name),
+            parse_mode="Markdown"
+        )
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
