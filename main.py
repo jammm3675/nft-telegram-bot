@@ -136,7 +136,7 @@ def nft_detail_keyboard(nft_name):
             InlineKeyboardButton("🔄 DM(exchange)", url=f"https://t.me/{CONTACT_USER}"),
             InlineKeyboardButton("🏠 Home", callback_data="home")
         ],
-        [InlineKeyboardButton("🔙 Back", callback_data="nft_menu")]
+        [InlineKeyboardButton("🔙 Back", callback_data="back_nft")]  # Изменено на back_nft
     ])
 
 def stickers_menu_keyboard():
@@ -179,7 +179,6 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         try:
             await query.edit_message_text(text, reply_markup=main_menu_keyboard(), parse_mode="Markdown")
         except BadRequest:
-            # Если сообщение не содержит текста (например, это фото), отправляем новое
             await context.bot.send_message(
                 chat_id=query.message.chat_id,
                 text=text,
@@ -211,7 +210,6 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
 
     nft = NFT_COLLECTIONS[nft_name]
     chat_id = query.message.chat_id
-    message_id = query.message.message_id
     
     logger.info(f"Отправка изображения для {nft_name}: {nft['image']}")
     
@@ -225,11 +223,7 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
             parse_mode="Markdown"
         )
         
-        # Удаляем предыдущее сообщение
-        try:
-            await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-        except BadRequest as e:
-            logger.warning(f"Не удалось удалить сообщение: {e}")
+        logger.info(f"Изображение для {nft_name} успешно отправлено")
         
     except TelegramError as e:
         logger.error(f"Ошибка при отправке изображения: {e}")
@@ -248,11 +242,6 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
                 reply_markup=nft_detail_keyboard(nft_name),
                 parse_mode="Markdown"
             )
-            
-            try:
-                await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-            except BadRequest as e:
-                logger.warning(f"Не удалось удалить сообщение: {e}")
             
         except Exception as e2:
             logger.error(f"Ошибка при альтернативной отправке изображения: {e2}")
@@ -307,6 +296,24 @@ async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE
             parse_mode="Markdown"
         )
 
+# Новый обработчик для кнопки "Back" в NFT
+async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer()
+    
+    chat_id = query.message.chat_id
+    message_id = query.message.message_id
+    
+    try:
+        # Удаляем сообщение с деталями NFT
+        await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+        logger.info("Сообщение с деталями NFT удалено")
+    except BadRequest as e:
+        logger.error(f"Ошибка при удалении сообщения: {e}")
+    
+    # Показываем меню NFT
+    await show_nft_menu(update, context)
+
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     data = query.data
@@ -323,6 +330,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await show_sticker_detail(update, context, sticker_name)
     elif data == "home":
         await show_main_menu(update, context)
+    elif data == "back_nft":  # Обработка кнопки "Back" в деталях NFT
+        await handle_back_nft(update, context)
 
 # ===== ВЕБ-СЕРВЕР ДЛЯ UPTIMEROBOT =====
 def run_flask_server():
