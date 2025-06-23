@@ -19,7 +19,7 @@ REPLIT_APP_NAME = os.environ.get('REPLIT_APP_NAME', 'nft-telegram-bot')
 # Описания NFT коллекций
 NFT_COLLECTIONS = {
     "NIX": {
-        "image": "https://web.telegram.org/e9c31932-c226-473b-823c-081604151585",
+        "image": "blob:https://web.telegram.org/4ba83de2-b2cf-47cc-abbe-4dca8d1971c1",
         "description": (
             "**NIX**\n"
             "by Postmarks: The Jaegers\n\n"
