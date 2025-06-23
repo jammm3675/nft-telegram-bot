@@ -2,6 +2,8 @@ import logging
 import os
 import threading
 import asyncio
+import requests
+from io import BytesIO
 from flask import Flask, Response
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
@@ -20,7 +22,7 @@ BOT_TOKEN = os.environ.get('BOT_TOKEN', '7953613164:AAF2sa_5nwE45LCcn-7dB_saJOPn
 # Описания NFT коллекций с ПРЯМЫМИ ссылками на изображения
 NFT_COLLECTIONS = {
     "NIX": {
-        "image": "https://i.ibb.co/L0v6s1r/NIX.png",  # Рабочая ссылка
+        "image": "https://i.ibb.co/MyCJ8J33/NIX.png",  # Исправленная ссылка
         "description": (
             "**NIX**\n"
             "by Postmarks: The Jaegers\n\n"
@@ -30,7 +32,7 @@ NFT_COLLECTIONS = {
         )
     },
     "TON POKER": {
-        "image": "https://i.ibb.co/0XZPc7t/TON-POKER.png",  # Рабочая ссылка
+        "image": "https://i.ibb.co/RTHnvCsr/TON-POKER.png",  # Исправленная ссылка
         "description": (
             "**Ace of Strength**\n"
             "by Medieval Deck\n\n"
@@ -39,7 +41,7 @@ NFT_COLLECTIONS = {
         )
     },
     "Fool moon": {
-        "image": "https://i.ibb.co/0XQzqJq/Fool-moon.png",  # Рабочая ссылка
+        "image": "https://i.ibb.co/1tvKy4HV/Fool-moon.png",  # Исправленная ссылка
         "description": (
             "**Fool Moon**\n"
             "by Postmarks: Odds + Ends\n\n"
@@ -50,7 +52,7 @@ NFT_COLLECTIONS = {
         )
     },
     "The League": {
-        "image": "https://i.ibb.co/4W0tRq5/Lost-Dogs.png",  # Рабочая ссылка (используем Lost Dogs)
+        "image": "https://i.ibb.co/gZ20qd68/Lost-Dogs.png",  # Исправленная ссылка
         "description": (
             "**The League**\n"
             "by Lost Dogs: The Hint\n\n"
@@ -60,7 +62,7 @@ NFT_COLLECTIONS = {
         )
     },
     "CARTONKI": {
-        "image": "https://i.ibb.co/3rTp0vF/CARTONKI.png",  # Рабочая ссылка
+        "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",  # Исправленная ссылка
         "description": (
             "**Gift box**\n"
             "by Gems Winter Store\n\n"
@@ -165,7 +167,8 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         "🌟 **NFTs for sale**\n\n"
         "This bot represents all NFTs that are ready to pass into the hands of a new owner :) \n\n"
         "To avoid scams, transactions are conducted through: @GiftElfRobot \n\n"
-        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️"
+        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️\n\n"
+        "bot by jammm 🐱"
     )
 
     if update.message:
@@ -196,7 +199,7 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
     logger.info(f"Отправка изображения для {nft_name}: {nft['image']}")
     
     try:
-        # Отправляем изображение
+        # Вариант 1: Отправка по прямой ссылке
         await context.bot.send_photo(
             chat_id=chat_id,
             photo=nft['image'],
@@ -212,14 +215,37 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
     except TelegramError as e:
         logger.error(f"Ошибка при отправке изображения: {e}")
         try:
-            # Если не удалось отправить фото, отправляем текстовое сообщение
-            await query.edit_message_text(
-                text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Изображение временно недоступно",
+            logger.info("Пробуем альтернативный метод загрузки изображения...")
+            
+            # Вариант 2: Скачиваем изображение и отправляем как файл
+            response = requests.get(nft['image'])
+            response.raise_for_status()
+            
+            photo_file = BytesIO(response.content)
+            photo_file.name = f"{nft_name}.png"
+            
+            await context.bot.send_photo(
+                chat_id=chat_id,
+                photo=photo_file,
+                caption=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange",
                 reply_markup=nft_detail_keyboard(nft_name),
                 parse_mode="Markdown"
             )
+            
+            await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+            logger.info(f"Изображение для {nft_name} успешно отправлено (альтернативный метод)")
+            
         except Exception as e2:
-            logger.error(f"Ошибка при отправке текста: {e2}")
+            logger.error(f"Ошибка при альтернативной отправке изображения: {e2}")
+            try:
+                # Если не удалось отправить фото, отправляем текстовое сообщение
+                await query.edit_message_text(
+                    text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Image is temporarily unavailable",
+                    reply_markup=nft_detail_keyboard(nft_name),
+                    parse_mode="Markdown"
+                )
+            except Exception as e3:
+                logger.error(f"Ошибка при отправке текста: {e3}")
 
 async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
