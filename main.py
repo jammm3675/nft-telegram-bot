@@ -2,12 +2,13 @@ import logging
 import os
 import threading
 import asyncio
+import time
 import requests
 from io import BytesIO
 from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
-from telegram.error import TelegramError, BadRequest
+from telegram.error import TelegramError, BadRequest, Conflict
 
 # Настройка логирования
 logging.basicConfig(
@@ -136,7 +137,7 @@ def nft_detail_keyboard(nft_name):
             InlineKeyboardButton("🔄 DM(exchange)", url=f"https://t.me/{CONTACT_USER}"),
             InlineKeyboardButton("🏠 Home", callback_data="home")
         ],
-        [InlineKeyboardButton("🔙 Back", callback_data="back_nft")]  # Изменено на back_nft
+        [InlineKeyboardButton("🔙 Back", callback_data="back_nft")]
     ])
 
 def stickers_menu_keyboard():
@@ -296,7 +297,7 @@ async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE
             parse_mode="Markdown"
         )
 
-# Новый обработчик для кнопки "Back" в NFT
+# Обработчик для кнопки "Back" в NFT
 async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
@@ -330,7 +331,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await show_sticker_detail(update, context, sticker_name)
     elif data == "home":
         await show_main_menu(update, context)
-    elif data == "back_nft":  # Обработка кнопки "Back" в деталях NFT
+    elif data == "back_nft":
         await handle_back_nft(update, context)
 
 # ===== ВЕБ-СЕРВЕР ДЛЯ UPTIMEROBOT =====
@@ -366,7 +367,32 @@ def main() -> None:
     application.add_handler(CallbackQueryHandler(button_handler))
 
     logger.info("🤖 Бот запущен! Ожидание сообщений...")
-    application.run_polling(drop_pending_updates=True)
+    
+    # Настройки для работы с несколькими пользователями
+    max_retries = 5
+    retry_delay = 10  # секунд
+    
+    for attempt in range(max_retries):
+        try:
+            application.run_polling(
+                drop_pending_updates=True,
+                close_loop=False,
+                allowed_updates=Update.ALL_TYPES,
+                # Увеличиваем интервал опроса для экономии ресурсов
+                poll_interval=2.0  # Запросы раз в 2 секунды вместо 0.5 по умолчанию
+            )
+            break
+        except Conflict as e:
+            logger.error(f"Conflict error (attempt {attempt+1}/{max_retries}): {e}")
+            if attempt < max_retries - 1:
+                logger.info(f"Retrying in {retry_delay} seconds...")
+                time.sleep(retry_delay)
+                retry_delay *= 2  # Экспоненциальная задержка
+            else:
+                logger.error("Max retries exceeded. Bot stopped.")
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            break
 
 if __name__ == "__main__":
     main()
