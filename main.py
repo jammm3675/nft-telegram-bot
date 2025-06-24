@@ -137,7 +137,7 @@ def nft_detail_keyboard(nft_name):
             InlineKeyboardButton("🔄 DM(exchange)", url=f"https://t.me/{CONTACT_USER}"),
             InlineKeyboardButton("🏠 Home", callback_data="home")
         ],
-        [InlineKeyboardButton("🔙 Back", callback_data="back_nft")]
+        [InlineKeyboardButton("🔙 Back", callback_data="nft_menu")]
     ])
 
 def stickers_menu_keyboard():
@@ -174,16 +174,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         context.user_data.pop('base_message_id', None)
     
     # Очищаем временные сообщения
-    if 'temp_messages' in context.user_data:
-        for msg_id in context.user_data['temp_messages']:
-            try:
-                await context.bot.delete_message(
-                    chat_id=update.effective_chat.id,
-                    message_id=msg_id
-                )
-            except TelegramError:
-                pass
-        context.user_data['temp_messages'] = []
+    await cleanup_temp_messages(context, update.effective_chat.id)
     
     await show_main_menu(update, context, is_new=True)
 
@@ -209,6 +200,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
             parse_mode="Markdown"
         )
         context.user_data['base_message_id'] = message.message_id
+        context.user_data.setdefault('temp_messages', [])
     else:
         try:
             # Редактируем существующее сообщение
@@ -235,18 +227,22 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
 
 async def cleanup_temp_messages(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
     """Удаляет все временные сообщения"""
-    user_data = context.user_data
-    if 'temp_messages' not in user_data:
+    if 'temp_messages' not in context.user_data:
+        context.user_data['temp_messages'] = []
         return
     
-    for msg_id in user_data['temp_messages']:
+    # Создаем копию списка для безопасной итерации
+    temp_messages = context.user_data['temp_messages'][:]
+    context.user_data['temp_messages'] = []
+    
+    for msg_id in temp_messages:
         try:
             await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
             logger.info(f"Удалено временное сообщение: {msg_id}")
-        except Exception as e:
-            logger.error(f"Ошибка при удалении временного сообщения: {e}")
-    
-    user_data['temp_messages'] = []
+        except TelegramError as e:
+            # Игнорируем ошибки "сообщение не найдено"
+            if "Message to delete not found" not in str(e):
+                logger.error(f"Ошибка при удалении временного сообщения: {e}")
 
 async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Показывает меню NFT"""
@@ -390,18 +386,6 @@ async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
         context.user_data['base_message_id'] = message.message_id
 
-# Обработчик для кнопки "Back" в NFT
-async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Возврат из детализации NFT в меню NFT"""
-    query = update.callback_query
-    await query.answer()
-    
-    # Очищаем все временные сообщения
-    await cleanup_temp_messages(context, query.message.chat_id)
-    
-    # Показываем меню NFT
-    await show_nft_menu(update, context)
-
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик всех callback-кнопок"""
     query = update.callback_query
@@ -419,8 +403,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await show_sticker_detail(update, context, sticker_name)
     elif data == "home":
         await show_main_menu(update, context)
-    elif data == "back_nft":
-        await handle_back_nft(update, context)
 
 # ===== ВЕБ-СЕРВЕР ДЛЯ UPTIMEROBOT =====
 def run_flask_server():
