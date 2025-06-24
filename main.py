@@ -128,7 +128,7 @@ def nft_menu_keyboard():
     buttons = []
     for nft_name in NFT_COLLECTIONS:
         buttons.append([InlineKeyboardButton(nft_name, callback_data=f"nft_{nft_name}")])
-    buttons.append([InlineKeyboardButton("🏠 Home", callback_data="home")])
+    buttons.append([InlineKeyboardButton("🔙 Back", callback_data="home")])
     return InlineKeyboardMarkup(buttons)
 
 def nft_detail_keyboard(nft_name):
