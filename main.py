@@ -8,7 +8,7 @@ from io import BytesIO
 from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
-from telegram.error import TelegramError, BadRequest, Conflict
+from telegram.error import TelegramError, BadRequest, Conflict, NetworkError
 
 # Настройка логирования
 logging.basicConfig(
@@ -137,7 +137,7 @@ def nft_detail_keyboard(nft_name):
             InlineKeyboardButton("🔄 DM(exchange)", url=f"https://t.me/{CONTACT_USER}"),
             InlineKeyboardButton("🏠 Home", callback_data="home")
         ],
-        [InlineKeyboardButton("🔙 Back", callback_data="nft_menu")]
+        [InlineKeyboardButton("🔙 Back", callback_data="back")]
     ])
 
 def stickers_menu_keyboard():
@@ -154,7 +154,7 @@ def sticker_detail_keyboard(sticker_name):
             InlineKeyboardButton("💰 DM(purchase)", url=f"https://t.me/{CONTACT_USER}")
         ],
         [
-            InlineKeyboardButton("🔙 Back", callback_data="stickers_menu"),
+            InlineKeyboardButton("🔙 Back", callback_data="back"),
             InlineKeyboardButton("🏠 Home", callback_data="home")
         ]
     ])
@@ -162,23 +162,12 @@ def sticker_detail_keyboard(sticker_name):
 # ===== ОБРАБОТЧИКИ =====
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик команды /start"""
-    # Сбрасываем состояние пользователя
-    if 'base_message_id' in context.user_data:
-        try:
-            await context.bot.delete_message(
-                chat_id=update.effective_chat.id,
-                message_id=context.user_data['base_message_id']
-            )
-        except TelegramError:
-            pass
-        context.user_data.pop('base_message_id', None)
+    # Инициализируем историю сообщений
+    context.user_data['message_history'] = []
     
-    # Очищаем временные сообщения
-    await cleanup_temp_messages(context, update.effective_chat.id)
-    
-    await show_main_menu(update, context, is_new=True)
+    await show_main_menu(update, context)
 
-async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_new=False) -> None:
+async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Показывает главное меню"""
     text = (
         "🌟 **NFTs for sale**\n\n"
@@ -188,81 +177,71 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
         "bot by jammm 🐱"
     )
     
-    # Очищаем предыдущие временные сообщения
-    await cleanup_temp_messages(context, update.effective_chat.id)
+    # Удаляем предыдущие сообщения
+    await cleanup_previous_messages(context, update.effective_chat.id)
     
-    # Если это новое сообщение или нет сохраненного ID
-    if is_new or 'base_message_id' not in context.user_data:
-        message = await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=text,
-            reply_markup=main_menu_keyboard(),
-            parse_mode="Markdown"
-        )
-        context.user_data['base_message_id'] = message.message_id
-        context.user_data.setdefault('temp_messages', [])
-    else:
-        try:
-            # Редактируем существующее сообщение
-            await context.bot.edit_message_text(
-                chat_id=update.effective_chat.id,
-                message_id=context.user_data['base_message_id'],
-                text=text,
-                reply_markup=main_menu_keyboard(),
-                parse_mode="Markdown"
-            )
-        except BadRequest as e:
-            if "Message is not modified" in str(e):
-                # Игнорируем если сообщение не изменилось
-                pass
-            else:
-                # Создаем новое сообщение при ошибке
-                message = await context.bot.send_message(
-                    chat_id=update.effective_chat.id,
-                    text=text,
-                    reply_markup=main_menu_keyboard(),
-                    parse_mode="Markdown"
-                )
-                context.user_data['base_message_id'] = message.message_id
+    # Отправляем новое сообщение
+    message = await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=text,
+        reply_markup=main_menu_keyboard(),
+        parse_mode="Markdown"
+    )
+    
+    # Сохраняем в истории
+    save_message_to_history(context, message.message_id)
 
-async def cleanup_temp_messages(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
-    """Удаляет все временные сообщения"""
-    if 'temp_messages' not in context.user_data:
-        context.user_data['temp_messages'] = []
+async def cleanup_previous_messages(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
+    """Удаляет предыдущие сообщения из истории"""
+    if 'message_history' not in context.user_data:
+        context.user_data['message_history'] = []
         return
     
-    # Создаем копию списка для безопасной итерации
-    temp_messages = context.user_data['temp_messages'][:]
-    context.user_data['temp_messages'] = []
-    
-    for msg_id in temp_messages:
+    # Удаляем все сообщения кроме последнего (если он есть)
+    for msg_id in context.user_data['message_history'][:-1]:
         try:
             await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
-            logger.info(f"Удалено временное сообщение: {msg_id}")
         except TelegramError as e:
-            # Игнорируем ошибки "сообщение не найдено"
-            if "Message to delete not found" not in str(e):
-                logger.error(f"Ошибка при удалении временного сообщения: {e}")
+            if "message to delete not found" not in str(e).lower():
+                logger.warning(f"Не удалось удалить сообщение {msg_id}: {e}")
+    
+    # Оставляем только последнее сообщение в истории
+    if context.user_data['message_history']:
+        context.user_data['message_history'] = [context.user_data['message_history'][-1]]
+
+def save_message_to_history(context: ContextTypes.DEFAULT_TYPE, message_id: int):
+    """Сохраняет ID сообщения в истории"""
+    if 'message_history' not in context.user_data:
+        context.user_data['message_history'] = []
+    
+    context.user_data['message_history'].append(message_id)
+    
+    # Ограничиваем историю 10 сообщениями
+    if len(context.user_data['message_history']) > 10:
+        context.user_data['message_history'] = context.user_data['message_history'][-10:]
 
 async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Показывает меню NFT"""
     query = update.callback_query
     await query.answer()
     
-    # Очищаем временные сообщения
-    await cleanup_temp_messages(context, query.message.chat_id)
+    # Удаляем предыдущие сообщения
+    await cleanup_previous_messages(context, query.message.chat_id)
     
-    # Редактируем основное сообщение
+    # Редактируем последнее сообщение
     try:
         await context.bot.edit_message_text(
             chat_id=query.message.chat_id,
-            message_id=context.user_data['base_message_id'],
+            message_id=context.user_data['message_history'][-1],
             text="🎨 **NFT Collections**\nSelect an NFT to view:",
             reply_markup=nft_menu_keyboard(),
             parse_mode="Markdown"
         )
-    except BadRequest as e:
-        logger.error(f"Ошибка при редактировании сообщения: {e}")
+    except (BadRequest, TelegramError) as e:
+        if "message is not modified" in str(e).lower():
+            # Игнорируем, если сообщение не изменилось
+            return
+        logger.error(f"Ошибка при редактировании NFT меню: {e}")
         # Создаем новое сообщение при ошибке
         message = await context.bot.send_message(
             chat_id=query.message.chat_id,
@@ -270,7 +249,21 @@ async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             reply_markup=nft_menu_keyboard(),
             parse_mode="Markdown"
         )
-        context.user_data['base_message_id'] = message.message_id
+        save_message_to_history(context, message.message_id)
+
+async def download_image(url: str, timeout: int = 10) -> BytesIO:
+    """Асинхронно загружает изображение"""
+    loop = asyncio.get_event_loop()
+    try:
+        response = await loop.run_in_executor(
+            None, 
+            lambda: requests.get(url, timeout=timeout)
+        )
+        response.raise_for_status()
+        return BytesIO(response.content)
+    except Exception as e:
+        logger.error(f"Ошибка загрузки изображения: {e}")
+        return None
 
 async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nft_name: str) -> None:
     """Показывает детали NFT"""
@@ -280,32 +273,16 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
     nft = NFT_COLLECTIONS[nft_name]
     chat_id = query.message.chat_id
     
-    # Очищаем предыдущие временные сообщения
-    await cleanup_temp_messages(context, chat_id)
+    # Загружаем изображение асинхронно
+    photo_file = None
+    try:
+        photo_file = await download_image(nft['image'])
+    except Exception as e:
+        logger.error(f"Ошибка при загрузке изображения: {e}")
     
     try:
-        # Отправляем временное сообщение с изображением
-        message = await context.bot.send_photo(
-            chat_id=chat_id,
-            photo=nft['image'],
-            caption=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange",
-            reply_markup=nft_detail_keyboard(nft_name),
-            parse_mode="Markdown"
-        )
-        
-        # Сохраняем ID временного сообщения
-        context.user_data.setdefault('temp_messages', []).append(message.message_id)
-        
-    except TelegramError as e:
-        logger.error(f"Ошибка при отправке изображения: {e}")
-        try:
-            # Попытка скачать и отправить изображение
-            response = requests.get(nft['image'])
-            response.raise_for_status()
-            
-            photo_file = BytesIO(response.content)
-            photo_file.name = f"{nft_name}.png"
-            
+        if photo_file:
+            # Отправляем сообщение с изображением
             message = await context.bot.send_photo(
                 chat_id=chat_id,
                 photo=photo_file,
@@ -313,39 +290,50 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
                 reply_markup=nft_detail_keyboard(nft_name),
                 parse_mode="Markdown"
             )
-            
-            context.user_data.setdefault('temp_messages', []).append(message.message_id)
-            
-        except Exception as e2:
-            logger.error(f"Ошибка при альтернативной отправке: {e2}")
-            # Отправляем текстовое сообщение
+        else:
+            # Отправляем текстовое сообщение если изображение недоступно
             message = await context.bot.send_message(
                 chat_id=chat_id,
                 text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Image is temporarily unavailable",
                 reply_markup=nft_detail_keyboard(nft_name),
                 parse_mode="Markdown"
             )
-            context.user_data.setdefault('temp_messages', []).append(message.message_id)
+        
+        # Сохраняем в истории
+        save_message_to_history(context, message.message_id)
+        
+    except TelegramError as e:
+        logger.error(f"Ошибка при отправке NFT: {e}")
+        # Отправляем текстовое сообщение как запасной вариант
+        message = await context.bot.send_message(
+            chat_id=chat_id,
+            text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange",
+            reply_markup=nft_detail_keyboard(nft_name),
+            parse_mode="Markdown"
+        )
+        save_message_to_history(context, message.message_id)
 
 async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Показывает меню стикеров"""
     query = update.callback_query
     await query.answer()
     
-    # Очищаем временные сообщения
-    await cleanup_temp_messages(context, query.message.chat_id)
+    # Удаляем предыдущие сообщения
+    await cleanup_previous_messages(context, query.message.chat_id)
     
-    # Редактируем основное сообщение
+    # Редактируем последнее сообщение
     try:
         await context.bot.edit_message_text(
             chat_id=query.message.chat_id,
-            message_id=context.user_data['base_message_id'],
+            message_id=context.user_data['message_history'][-1],
             text="🎭 **Stickerpacks**\nSelect a sticker collection:",
             reply_markup=stickers_menu_keyboard(),
             parse_mode="Markdown"
         )
-    except BadRequest as e:
-        logger.error(f"Ошибка при редактировании сообщения: {e}")
+    except (BadRequest, TelegramError) as e:
+        if "message is not modified" in str(e).lower():
+            return
+        logger.error(f"Ошибка при редактировании меню стикеров: {e}")
         # Создаем новое сообщение при ошибке
         message = await context.bot.send_message(
             chat_id=query.message.chat_id,
@@ -353,30 +341,32 @@ async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
             reply_markup=stickers_menu_keyboard(),
             parse_mode="Markdown"
         )
-        context.user_data['base_message_id'] = message.message_id
+        save_message_to_history(context, message.message_id)
 
 async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, sticker_name: str) -> None:
     """Показывает детали стикерпака"""
     query = update.callback_query
     await query.answer()
     
-    # Очищаем временные сообщения
-    await cleanup_temp_messages(context, query.message.chat_id)
-    
     sticker_data = STICKER_COLLECTIONS[sticker_name]
     text = f"✨ **{sticker_name}** ✨\n\n{sticker_data['description']}\n\nSelect action:"
     
-    # Редактируем основное сообщение
+    # Удаляем предыдущие сообщения
+    await cleanup_previous_messages(context, query.message.chat_id)
+    
+    # Редактируем последнее сообщение
     try:
         await context.bot.edit_message_text(
             chat_id=query.message.chat_id,
-            message_id=context.user_data['base_message_id'],
+            message_id=context.user_data['message_history'][-1],
             text=text,
             reply_markup=sticker_detail_keyboard(sticker_name),
             parse_mode="Markdown"
         )
-    except BadRequest as e:
-        logger.error(f"Ошибка при редактировании сообщения: {e}")
+    except (BadRequest, TelegramError) as e:
+        if "message is not modified" in str(e).lower():
+            return
+        logger.error(f"Ошибка при редактировании деталей стикера: {e}")
         # Создаем новое сообщение при ошибке
         message = await context.bot.send_message(
             chat_id=query.message.chat_id,
@@ -384,25 +374,81 @@ async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE
             reply_markup=sticker_detail_keyboard(sticker_name),
             parse_mode="Markdown"
         )
-        context.user_data['base_message_id'] = message.message_id
+        save_message_to_history(context, message.message_id)
+
+async def handle_back(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Обработчик кнопки Назад"""
+    query = update.callback_query
+    await query.answer()
+    
+    # Удаляем текущее сообщение
+    try:
+        await context.bot.delete_message(
+            chat_id=query.message.chat_id,
+            message_id=query.message.message_id
+        )
+    except TelegramError as e:
+        logger.warning(f"Не удалось удалить сообщение при возврате: {e}")
+    
+    # Удаляем ID из истории
+    if 'message_history' in context.user_data and context.user_data['message_history']:
+        context.user_data['message_history'].pop()
+    
+    # Если в истории остались сообщения, активируем предыдущее
+    if 'message_history' in context.user_data and context.user_data['message_history']:
+        last_msg_id = context.user_data['message_history'][-1]
+        try:
+            await context.bot.edit_message_reply_markup(
+                chat_id=query.message.chat_id,
+                message_id=last_msg_id,
+                reply_markup=None
+            )
+            
+            # "Активируем" предыдущее сообщение
+            await context.bot.forward_message(
+                chat_id=query.message.chat_id,
+                from_chat_id=query.message.chat_id,
+                message_id=last_msg_id
+            )
+        except TelegramError as e:
+            logger.error(f"Ошибка при активации предыдущего сообщения: {e}")
+    else:
+        # Если история пуста, показываем главное меню
+        await show_main_menu(update, context)
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик всех callback-кнопок"""
     query = update.callback_query
     data = query.data
 
-    if data == "nft_menu":
-        await show_nft_menu(update, context)
-    elif data == "stickers_menu":
-        await show_stickers_menu(update, context)
-    elif data.startswith("nft_"):
-        nft_name = data[4:]
-        await show_nft_detail(update, context, nft_name)
-    elif data.startswith("sticker_"):
-        sticker_name = data[8:]
-        await show_sticker_detail(update, context, sticker_name)
-    elif data == "home":
-        await show_main_menu(update, context)
+    try:
+        if data == "nft_menu":
+            await show_nft_menu(update, context)
+        elif data == "stickers_menu":
+            await show_stickers_menu(update, context)
+        elif data.startswith("nft_"):
+            nft_name = data[4:]
+            await show_nft_detail(update, context, nft_name)
+        elif data.startswith("sticker_"):
+            sticker_name = data[8:]
+            await show_sticker_detail(update, context, sticker_name)
+        elif data == "home":
+            await show_main_menu(update, context)
+        elif data == "back":
+            await handle_back(update, context)
+    except NetworkError as e:
+        logger.error(f"Сетевая ошибка: {e}")
+        # Пытаемся отправить сообщение об ошибке
+        try:
+            await query.answer("⚠️ Произошла сетевая ошибка. Пожалуйста, попробуйте позже.", show_alert=True)
+        except:
+            pass
+    except Exception as e:
+        logger.error(f"Необработанная ошибка: {e}")
+        try:
+            await query.answer("❌ Произошла ошибка. Пожалуйста, попробуйте еще раз.", show_alert=True)
+        except:
+            pass
 
 # ===== ВЕБ-СЕРВЕР ДЛЯ UPTIMEROBOT =====
 def run_flask_server():
@@ -431,37 +477,44 @@ def main() -> None:
     server_thread.start()
     logger.info(f"🌐 HTTP server running on port {os.environ.get('PORT', 10000)}")
 
-    # Создаем и запускаем бота в основном потоке
+    # Создаем и запускаем бот
     application = Application.builder().token(BOT_TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_handler))
 
     logger.info("🤖 Бот запущен! Ожидание сообщений...")
     
-    # Настройки для работы с несколькими пользователями
-    max_retries = 5
-    retry_delay = 10  # секунд
+    # Настройки перезапуска при ошибках
+    max_retries = 10
+    retry_delay = 5
     
     for attempt in range(max_retries):
         try:
             application.run_polling(
                 drop_pending_updates=True,
-                close_loop=False,
                 allowed_updates=Update.ALL_TYPES,
-                poll_interval=2.0
+                poll_interval=1.5,
+                close_loop=False
             )
             break
         except Conflict as e:
-            logger.error(f"Conflict error (attempt {attempt+1}/{max_retries}): {e}")
+            logger.error(f"Conflict error (попытка {attempt+1}/{max_retries}): {e}")
             if attempt < max_retries - 1:
-                logger.info(f"Retrying in {retry_delay} seconds...")
+                logger.info(f"Повторная попытка через {retry_delay} секунд...")
                 time.sleep(retry_delay)
-                retry_delay *= 2
+                retry_delay *= 1.5
             else:
-                logger.error("Max retries exceeded. Bot stopped.")
+                logger.error("Достигнут максимум попыток. Бот остановлен.")
+        except NetworkError as e:
+            logger.error(f"Сетевая ошибка (попытка {attempt+1}/{max_retries}): {e}")
+            time.sleep(retry_delay)
+            retry_delay *= 1.5
         except Exception as e:
-            logger.error(f"Unexpected error: {e}")
-            break
+            logger.error(f"Неожиданная ошибка: {e}")
+            time.sleep(retry_delay)
+            retry_delay *= 1.5
+
+    logger.info("Бот остановлен")
 
 if __name__ == "__main__":
     main()
