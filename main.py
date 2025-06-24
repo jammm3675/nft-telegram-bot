@@ -144,7 +144,7 @@ def stickers_menu_keyboard():
     buttons = []
     for sticker_name in STICKER_COLLECTIONS:
         buttons.append([InlineKeyboardButton(sticker_name, callback_data=f"sticker_{sticker_name}")])
-    buttons.append([InlineKeyboardButton("🏠 Home", callback_data="home")])
+    buttons.append([InlineKeyboardButton("🔙 Back", callback_data="home")])
     return InlineKeyboardMarkup(buttons)
 
 def sticker_detail_keyboard(sticker_name):
