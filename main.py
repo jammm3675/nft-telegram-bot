@@ -159,11 +159,72 @@ def sticker_detail_keyboard(sticker_name):
         ]
     ])
 
+# ===== ОСНОВНОЕ СООБЩЕНИЕ =====
+async def edit_base_message(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, reply_markup: InlineKeyboardMarkup):
+    """Редактирует основное сообщение или создает новое при необходимости"""
+    chat_id = update.effective_chat.id
+    user_data = context.user_data
+    
+    # Инициализация user_data
+    if 'base_message_id' not in user_data:
+        user_data['base_message_id'] = None
+    if 'temp_messages' not in user_data:
+        user_data['temp_messages'] = []
+
+    base_message_id = user_data['base_message_id']
+    
+    try:
+        # Пытаемся отредактировать существующее сообщение
+        if base_message_id:
+            await context.bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=base_message_id,
+                text=text,
+                reply_markup=reply_markup,
+                parse_mode="Markdown"
+            )
+            return base_message_id
+    
+    except (BadRequest, TelegramError) as e:
+        logger.warning(f"Не удалось отредактировать сообщение: {e}. Создаем новое.")
+
+    # Создаем новое сообщение, если редактирование невозможно
+    message = await context.bot.send_message(
+        chat_id=chat_id,
+        text=text,
+        reply_markup=reply_markup,
+        parse_mode="Markdown"
+    )
+    
+    user_data['base_message_id'] = message.message_id
+    return message.message_id
+
+async def cleanup_temp_messages(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
+    """Удаляет все временные сообщения"""
+    user_data = context.user_data
+    if 'temp_messages' not in user_data:
+        return
+    
+    for msg_id in user_data['temp_messages']:
+        try:
+            await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
+            logger.info(f"Удалено временное сообщение: {msg_id}")
+        except Exception as e:
+            logger.error(f"Ошибка при удалении временного сообщения: {e}")
+    
+    user_data['temp_messages'] = []
+
 # ===== ОБРАБОТЧИКИ =====
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await show_main_menu(update, context)
+    """Обработчик команды /start"""
+    user_data = context.user_data
+    user_data['base_message_id'] = None  # Сброс основного сообщения
+    user_data['temp_messages'] = []      # Сброс временных сообщений
+    
+    await show_main_menu(update, context, is_new=True)
 
-async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_new=False) -> None:
+    """Показывает главное меню"""
     text = (
         "🌟 **NFTs for sale**\n\n"
         "This bot represents all NFTs that are ready to pass into the hands of a new owner :) \n\n"
@@ -171,52 +232,44 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️\n\n\n"
         "bot by jammm 🐱"
     )
-
-    if update.message:
-        await update.message.reply_text(text, reply_markup=main_menu_keyboard(), parse_mode="Markdown")
-    else:
-        query = update.callback_query
-        await query.answer()
-        try:
-            await query.edit_message_text(text, reply_markup=main_menu_keyboard(), parse_mode="Markdown")
-        except BadRequest:
-            await context.bot.send_message(
-                chat_id=query.message.chat_id,
-                text=text,
-                reply_markup=main_menu_keyboard(),
-                parse_mode="Markdown"
-            )
+    
+    # Очищаем временные сообщения
+    await cleanup_temp_messages(context, update.effective_chat.id)
+    
+    # Создаем/редактируем основное сообщение
+    await edit_base_message(
+        update, 
+        context,
+        text,
+        main_menu_keyboard()
+    )
 
 async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    await query.answer()
-    try:
-        await query.edit_message_text(
-            "🎨 **NFT Collections**\nSelect an NFT to view:",
-            reply_markup=nft_menu_keyboard(),
-            parse_mode="Markdown"
-        )
-    except BadRequest:
-        await context.bot.send_message(
-            chat_id=query.message.chat_id,
-            text="🎨 **NFT Collections**\nSelect an NFT to view:",
-            reply_markup=nft_menu_keyboard(),
-            parse_mode="Markdown"
-        )
+    """Показывает меню NFT"""
+    # Очищаем временные сообщения
+    await cleanup_temp_messages(context, update.effective_chat.id)
+    
+    await edit_base_message(
+        update,
+        context,
+        "🎨 **NFT Collections**\nSelect an NFT to view:",
+        nft_menu_keyboard()
+    )
 
 async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nft_name: str) -> None:
+    """Показывает детали NFT"""
     query = update.callback_query
     await query.answer()
-    await asyncio.sleep(0.5)  # Задержка для предотвращения конфликтов
-
+    
     nft = NFT_COLLECTIONS[nft_name]
     chat_id = query.message.chat_id
     
-    logger.info(f"Отправка изображения для {nft_name}: {nft['image']}")
+    # Очищаем предыдущие временные сообщения
+    await cleanup_temp_messages(context, chat_id)
     
     try:
-        # Отправляем изображение по прямой ссылке
-        await context.bot.send_photo(
+        # Отправляем временное сообщение с изображением
+        message = await context.bot.send_photo(
             chat_id=chat_id,
             photo=nft['image'],
             caption=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange",
@@ -224,19 +277,20 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
             parse_mode="Markdown"
         )
         
-        logger.info(f"Изображение для {nft_name} успешно отправлено")
+        # Сохраняем ID временного сообщения
+        context.user_data.setdefault('temp_messages', []).append(message.message_id)
         
     except TelegramError as e:
         logger.error(f"Ошибка при отправке изображения: {e}")
         try:
-            # Скачиваем изображение и отправляем как файл
+            # Попытка скачать и отправить изображение
             response = requests.get(nft['image'])
             response.raise_for_status()
             
             photo_file = BytesIO(response.content)
             photo_file.name = f"{nft_name}.png"
             
-            await context.bot.send_photo(
+            message = await context.bot.send_photo(
                 chat_id=chat_id,
                 photo=photo_file,
                 caption=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange",
@@ -244,78 +298,60 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
                 parse_mode="Markdown"
             )
             
+            context.user_data.setdefault('temp_messages', []).append(message.message_id)
+            
         except Exception as e2:
-            logger.error(f"Ошибка при альтернативной отправке изображения: {e2}")
+            logger.error(f"Ошибка при альтернативной отправке: {e2}")
             # Отправляем текстовое сообщение
-            try:
-                await context.bot.send_message(
-                    chat_id=chat_id,
-                    text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Image is temporarily unavailable",
-                    reply_markup=nft_detail_keyboard(nft_name),
-                    parse_mode="Markdown"
-                )
-            except Exception as e3:
-                logger.error(f"Ошибка при отправке текста: {e3}")
+            message = await context.bot.send_message(
+                chat_id=chat_id,
+                text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Image is temporarily unavailable",
+                reply_markup=nft_detail_keyboard(nft_name),
+                parse_mode="Markdown"
+            )
+            context.user_data.setdefault('temp_messages', []).append(message.message_id)
 
 async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    await query.answer()
-    try:
-        await query.edit_message_text(
-            "🎭 **Stickerpacks**\nSelect a sticker collection:",
-            reply_markup=stickers_menu_keyboard(),
-            parse_mode="Markdown"
-        )
-    except BadRequest:
-        await context.bot.send_message(
-            chat_id=query.message.chat_id,
-            text="🎭 **Stickerpacks**\nSelect a sticker collection:",
-            reply_markup=stickers_menu_keyboard(),
-            parse_mode="Markdown"
-        )
+    """Показывает меню стикеров"""
+    # Очищаем временные сообщения
+    await cleanup_temp_messages(context, update.effective_chat.id)
+    
+    await edit_base_message(
+        update,
+        context,
+        "🎭 **Stickerpacks**\nSelect a sticker collection:",
+        stickers_menu_keyboard()
+    )
 
 async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, sticker_name: str) -> None:
-    query = update.callback_query
-    await query.answer()
-
+    """Показывает детали стикерпака"""
+    # Очищаем временные сообщения
+    await cleanup_temp_messages(context, update.effective_chat.id)
+    
     sticker_data = STICKER_COLLECTIONS[sticker_name]
-    description = sticker_data["description"]
-
-    text = f"✨ **{sticker_name}** ✨\n\n{description}\n\nSelect action:"
-
-    try:
-        await query.edit_message_text(
-            text,
-            reply_markup=sticker_detail_keyboard(sticker_name),
-            parse_mode="Markdown"
-        )
-    except BadRequest:
-        await context.bot.send_message(
-            chat_id=query.message.chat_id,
-            text=text,
-            reply_markup=sticker_detail_keyboard(sticker_name),
-            parse_mode="Markdown"
-        )
+    text = f"✨ **{sticker_name}** ✨\n\n{sticker_data['description']}\n\nSelect action:"
+    
+    await edit_base_message(
+        update,
+        context,
+        text,
+        sticker_detail_keyboard(sticker_name)
+    )
 
 # Обработчик для кнопки "Back" в NFT
 async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Возврат из детализации NFT в меню NFT"""
     query = update.callback_query
     await query.answer()
     
-    chat_id = query.message.chat_id
-    message_id = query.message.message_id
-    
-    try:
-        # Удаляем сообщение с деталями NFT
-        await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-        logger.info("Сообщение с деталями NFT удалено")
-    except BadRequest as e:
-        logger.error(f"Ошибка при удалении сообщения: {e}")
+    # Очищаем все временные сообщения (включая текущее)
+    await cleanup_temp_messages(context, query.message.chat_id)
     
     # Показываем меню NFT
     await show_nft_menu(update, context)
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Обработчик всех callback-кнопок"""
     query = update.callback_query
     data = query.data
 
@@ -378,8 +414,7 @@ def main() -> None:
                 drop_pending_updates=True,
                 close_loop=False,
                 allowed_updates=Update.ALL_TYPES,
-                # Увеличиваем интервал опроса для экономии ресурсов
-                poll_interval=2.0  # Запросы раз в 2 секунды вместо 0.5 по умолчанию
+                poll_interval=2.0
             )
             break
         except Conflict as e:
@@ -387,7 +422,7 @@ def main() -> None:
             if attempt < max_retries - 1:
                 logger.info(f"Retrying in {retry_delay} seconds...")
                 time.sleep(retry_delay)
-                retry_delay *= 2  # Экспоненциальная задержка
+                retry_delay *= 2
             else:
                 logger.error("Max retries exceeded. Bot stopped.")
         except Exception as e:
