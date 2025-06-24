@@ -159,45 +159,79 @@ def sticker_detail_keyboard(sticker_name):
         ]
     ])
 
-# ===== ОСНОВНОЕ СООБЩЕНИЕ =====
-async def edit_base_message(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, reply_markup: InlineKeyboardMarkup):
-    """Редактирует основное сообщение или создает новое при необходимости"""
-    chat_id = update.effective_chat.id
-    user_data = context.user_data
-    
-    # Инициализация user_data
-    if 'base_message_id' not in user_data:
-        user_data['base_message_id'] = None
-    if 'temp_messages' not in user_data:
-        user_data['temp_messages'] = []
-
-    base_message_id = user_data['base_message_id']
-    
-    try:
-        # Пытаемся отредактировать существующее сообщение
-        if base_message_id:
-            await context.bot.edit_message_text(
-                chat_id=chat_id,
-                message_id=base_message_id,
-                text=text,
-                reply_markup=reply_markup,
-                parse_mode="Markdown"
+# ===== ОБРАБОТЧИКИ =====
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Обработчик команды /start"""
+    # Сбрасываем состояние пользователя
+    if 'base_message_id' in context.user_data:
+        try:
+            await context.bot.delete_message(
+                chat_id=update.effective_chat.id,
+                message_id=context.user_data['base_message_id']
             )
-            return base_message_id
+        except TelegramError:
+            pass
+        context.user_data.pop('base_message_id', None)
     
-    except (BadRequest, TelegramError) as e:
-        logger.warning(f"Не удалось отредактировать сообщение: {e}. Создаем новое.")
+    # Очищаем временные сообщения
+    if 'temp_messages' in context.user_data:
+        for msg_id in context.user_data['temp_messages']:
+            try:
+                await context.bot.delete_message(
+                    chat_id=update.effective_chat.id,
+                    message_id=msg_id
+                )
+            except TelegramError:
+                pass
+        context.user_data['temp_messages'] = []
+    
+    await show_main_menu(update, context, is_new=True)
 
-    # Создаем новое сообщение, если редактирование невозможно
-    message = await context.bot.send_message(
-        chat_id=chat_id,
-        text=text,
-        reply_markup=reply_markup,
-        parse_mode="Markdown"
+async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_new=False) -> None:
+    """Показывает главное меню"""
+    text = (
+        "🌟 **NFTs for sale**\n\n"
+        "This bot represents all NFTs that are ready to pass into the hands of a new owner :) \n\n"
+        "To avoid scams, transactions are conducted through: @GiftElfRobot \n\n"
+        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️\n\n\n"
+        "bot by jammm 🐱"
     )
     
-    user_data['base_message_id'] = message.message_id
-    return message.message_id
+    # Очищаем предыдущие временные сообщения
+    await cleanup_temp_messages(context, update.effective_chat.id)
+    
+    # Если это новое сообщение или нет сохраненного ID
+    if is_new or 'base_message_id' not in context.user_data:
+        message = await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=text,
+            reply_markup=main_menu_keyboard(),
+            parse_mode="Markdown"
+        )
+        context.user_data['base_message_id'] = message.message_id
+    else:
+        try:
+            # Редактируем существующее сообщение
+            await context.bot.edit_message_text(
+                chat_id=update.effective_chat.id,
+                message_id=context.user_data['base_message_id'],
+                text=text,
+                reply_markup=main_menu_keyboard(),
+                parse_mode="Markdown"
+            )
+        except BadRequest as e:
+            if "Message is not modified" in str(e):
+                # Игнорируем если сообщение не изменилось
+                pass
+            else:
+                # Создаем новое сообщение при ошибке
+                message = await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=text,
+                    reply_markup=main_menu_keyboard(),
+                    parse_mode="Markdown"
+                )
+                context.user_data['base_message_id'] = message.message_id
 
 async def cleanup_temp_messages(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
     """Удаляет все временные сообщения"""
@@ -214,47 +248,33 @@ async def cleanup_temp_messages(context: ContextTypes.DEFAULT_TYPE, chat_id: int
     
     user_data['temp_messages'] = []
 
-# ===== ОБРАБОТЧИКИ =====
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Обработчик команды /start"""
-    user_data = context.user_data
-    user_data['base_message_id'] = None  # Сброс основного сообщения
-    user_data['temp_messages'] = []      # Сброс временных сообщений
-    
-    await show_main_menu(update, context, is_new=True)
-
-async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_new=False) -> None:
-    """Показывает главное меню"""
-    text = (
-        "🌟 **NFTs for sale**\n\n"
-        "This bot represents all NFTs that are ready to pass into the hands of a new owner :) \n\n"
-        "To avoid scams, transactions are conducted through: @GiftElfRobot \n\n"
-        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️\n\n\n"
-        "bot by jammm 🐱"
-    )
-    
-    # Очищаем временные сообщения
-    await cleanup_temp_messages(context, update.effective_chat.id)
-    
-    # Создаем/редактируем основное сообщение
-    await edit_base_message(
-        update, 
-        context,
-        text,
-        main_menu_keyboard()
-    )
-
 async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Показывает меню NFT"""
-    # Очищаем временные сообщения
-    await cleanup_temp_messages(context, update.effective_chat.id)
+    query = update.callback_query
+    await query.answer()
     
-    await edit_base_message(
-        update,
-        context,
-        "🎨 **NFT Collections**\nSelect an NFT to view:",
-        nft_menu_keyboard()
-    )
+    # Очищаем временные сообщения
+    await cleanup_temp_messages(context, query.message.chat_id)
+    
+    # Редактируем основное сообщение
+    try:
+        await context.bot.edit_message_text(
+            chat_id=query.message.chat_id,
+            message_id=context.user_data['base_message_id'],
+            text="🎨 **NFT Collections**\nSelect an NFT to view:",
+            reply_markup=nft_menu_keyboard(),
+            parse_mode="Markdown"
+        )
+    except BadRequest as e:
+        logger.error(f"Ошибка при редактировании сообщения: {e}")
+        # Создаем новое сообщение при ошибке
+        message = await context.bot.send_message(
+            chat_id=query.message.chat_id,
+            text="🎨 **NFT Collections**\nSelect an NFT to view:",
+            reply_markup=nft_menu_keyboard(),
+            parse_mode="Markdown"
+        )
+        context.user_data['base_message_id'] = message.message_id
 
 async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nft_name: str) -> None:
     """Показывает детали NFT"""
@@ -313,30 +333,62 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
 
 async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Показывает меню стикеров"""
-    # Очищаем временные сообщения
-    await cleanup_temp_messages(context, update.effective_chat.id)
+    query = update.callback_query
+    await query.answer()
     
-    await edit_base_message(
-        update,
-        context,
-        "🎭 **Stickerpacks**\nSelect a sticker collection:",
-        stickers_menu_keyboard()
-    )
+    # Очищаем временные сообщения
+    await cleanup_temp_messages(context, query.message.chat_id)
+    
+    # Редактируем основное сообщение
+    try:
+        await context.bot.edit_message_text(
+            chat_id=query.message.chat_id,
+            message_id=context.user_data['base_message_id'],
+            text="🎭 **Stickerpacks**\nSelect a sticker collection:",
+            reply_markup=stickers_menu_keyboard(),
+            parse_mode="Markdown"
+        )
+    except BadRequest as e:
+        logger.error(f"Ошибка при редактировании сообщения: {e}")
+        # Создаем новое сообщение при ошибке
+        message = await context.bot.send_message(
+            chat_id=query.message.chat_id,
+            text="🎭 **Stickerpacks**\nSelect a sticker collection:",
+            reply_markup=stickers_menu_keyboard(),
+            parse_mode="Markdown"
+        )
+        context.user_data['base_message_id'] = message.message_id
 
 async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, sticker_name: str) -> None:
     """Показывает детали стикерпака"""
+    query = update.callback_query
+    await query.answer()
+    
     # Очищаем временные сообщения
-    await cleanup_temp_messages(context, update.effective_chat.id)
+    await cleanup_temp_messages(context, query.message.chat_id)
     
     sticker_data = STICKER_COLLECTIONS[sticker_name]
     text = f"✨ **{sticker_name}** ✨\n\n{sticker_data['description']}\n\nSelect action:"
     
-    await edit_base_message(
-        update,
-        context,
-        text,
-        sticker_detail_keyboard(sticker_name)
-    )
+    # Редактируем основное сообщение
+    try:
+        await context.bot.edit_message_text(
+            chat_id=query.message.chat_id,
+            message_id=context.user_data['base_message_id'],
+            text=text,
+            reply_markup=sticker_detail_keyboard(sticker_name),
+            parse_mode="Markdown"
+        )
+    except BadRequest as e:
+        logger.error(f"Ошибка при редактировании сообщения: {e}")
+        # Создаем новое сообщение при ошибке
+        message = await context.bot.send_message(
+            chat_id=query.message.chat_id,
+            text=text,
+            reply_markup=sticker_detail_keyboard(sticker_name),
+            parse_mode="Markdown"
+        )
+        context.user_data['base_message_id'] = message.message_id
 
 # Обработчик для кнопки "Back" в NFT
 async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -344,7 +396,7 @@ async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     query = update.callback_query
     await query.answer()
     
-    # Очищаем все временные сообщения (включая текущее)
+    # Очищаем все временные сообщения
     await cleanup_temp_messages(context, query.message.chat_id)
     
     # Показываем меню NFT
