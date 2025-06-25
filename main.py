@@ -104,16 +104,16 @@ STICKER_COLLECTIONS = {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
             "**- Not Meme #2015**\n\n"
-            "Price: from 299 Ton\n\n"
-            "Probably nothing"
+            "Price: from 299 Ton\n\n\n"
+            "Probably nothing\n\n"
         )
     },
     "Lost Dogs": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
             "**- Magic of the Way #2871**\n\n"
-            "Price: from 9.99 Ton\n\n"
-            "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun?"
+            "Price: from 9.99 Ton\n\n\n"
+            "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun?\n\n"
         )
     },
     "Not pixel": {
@@ -126,8 +126,8 @@ STICKER_COLLECTIONS = {
             "**- Grass Pixel #2536**\n"
             "Price: from 4.99 Ton\n\n"
             "**- Mac Pixel #1736**\n\n"
-            "Price: from 4.99 Ton\n\n"
-            "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex"
+            "Price: from 4.99 Ton\n\n\n"
+            "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex\n\n"
         )
     },
     "Dogs OG": {
@@ -140,8 +140,8 @@ STICKER_COLLECTIONS = {
             "**- Panama #1417**\n"
             "Price: from 3.99 Ton\n\n"
             "**- Kamikaze #4812**\n\n"
-            "Price: from 2.99 Ton\n\n"
-            "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)!"
+            "Price: from 2.99 Ton\n\n\n"
+            "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)!\n\n"
         )
     },
     "Dogs Rewards": {
@@ -243,7 +243,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
     chat_id = update.effective_chat.id
     user_data = context.user_data
     text = (
-        "🌟 **NFTs for sale**\n\n"
+        "🌟 **NFTs for sale** 🌟\n\n"
         "This bot represents all NFTs that are ready to pass into the hands of a new owner :) \n\n"
         "To avoid scams, transactions are conducted through: @GiftElfRobot \n\n"
         "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️\n\n\n"
@@ -371,7 +371,7 @@ async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=user_data['base_message_id'],
-            text="🎭 **Stickerpacks**\nSelect a sticker collection:",
+            text="🎭 **Stickerpacks**\n\n\nSelect a sticker collection:",
             reply_markup=stickers_menu_keyboard(),
             parse_mode="Markdown"
         )
@@ -395,7 +395,7 @@ async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE
     await cleanup_temp_messages(context, chat_id)
     
     sticker_data = STICKER_COLLECTIONS[sticker_name]
-    text = f"✨ **{sticker_name}** ✨\n\n{sticker_data['description']}\n\nSelect action:"
+    text = f"✨ **{sticker_name}** ✨\n\n{sticker_data['description']}\n"
     
     try:
         # Редактируем основное сообщение
