@@ -71,6 +71,7 @@ NFT_COLLECTIONS = {
             "by Gems Winter Store\n\n"
             "Rarity: Rare\n\n"
             "Happy New Year! May 2025 bring you inspiration, good fortune, and countless joyful moments."
+        )
     },
     "The Seven Virtues": {
         "image": "https://i.ibb.co/ympwRnF8/TheSevenVirtues.png",
@@ -78,11 +79,12 @@ NFT_COLLECTIONS = {
             "**Patience Postmark**\n"
             "by The Seven Virtues\n\n"
             "Rarity: Rare\n\n"
-            "The Seven Virtues is a collaboration between the artist Olyabolyaboo and Cheques Corp., continuing the narrative of "The Seven Deadly Sins" "
+            "The Seven Virtues is a collaboration between the artist Olyabolyaboo and Cheques Corp., continuing the narrative of -The Seven Deadly Sins- "
             "While the sins made us reflect on our weaknesses, this collection inspires action. Humility, generosity, "
             "patience, purity, kindness, temperance, and diligence — seven principles that create a new story. "
             "This drop is a symbol of the bright side of your inner strength. "
-        },
+        )
+    },
     "Ton Space Badges": {
         "image": "https://i.ibb.co/LDDnhfXy/TonSpaceBadges.png",
         "description": (
