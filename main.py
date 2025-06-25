@@ -10,7 +10,6 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from telegram.error import TelegramError, BadRequest, Conflict
 
-# Настройка логирования
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -20,28 +19,30 @@ logger = logging.getLogger(__name__)
 # ===== КОНФИГУРАЦИЯ =====
 BOT_TOKEN = os.environ.get('BOT_TOKEN', '7953613164:AAF2sa_5nwE45LCcn-7dB_saJOPnPS_Z0F8')
 
-# Описания NFT коллекций с ПРЯМЫМИ ссылками на изображения
+# Описания NFT коллекций
 NFT_COLLECTIONS = {
-    "NIX": {
+    "Postmarks: The Jaegers": {
         "image": "https://i.ibb.co/MyCJ8J33/NIX.png",
         "description": (
             "**NIX**\n"
             "by Postmarks: The Jaegers\n\n"
+            "Rarity: Rare\n\n"
             "**Story**: Once one of the Jaegers tried to fight one of the ancient titans "
             "in the Pacific Ocean, but was defeated and now his body lies lifeless at a depth of 10 kilometers. "
             "But who knows, maybe he's just accumulating energy.\n"
         )
     },
-    "TON POKER": {
+    "Medieval Deck": {
         "image": "https://i.ibb.co/RTHnvCsr/TON-POKER.png",
         "description": (
             "**Ace of Strength**\n"
             "by Medieval Deck\n\n"
+            "Rarity: Epic\n\n"
             "Ilya Stallone crafted this NFT together with TON Poker, the way a storyteller weaves a legend: "
             "with irony, with mystery, with fire."
         )
     },
-    "Fool moon": {
+    "Postmarks: Odds + Ends": {
         "image": "https://i.ibb.co/1tvKy4HV/Fool-moon.png",
         "description": (
             "**Fool Moon**\n"
@@ -52,22 +53,45 @@ NFT_COLLECTIONS = {
             "but lost in delirium."
         )
     },
-    "The League": {
+    "Lost Dogs: The Hint": {
         "image": "https://i.ibb.co/gZ20qd68/Lost-Dogs.png",
         "description": (
             "**The League**\n"
             "by Lost Dogs: The Hint\n\n"
+            "Rarity: Rare\n\n"
             "Sometimes you need to look at the bigger picture to understand the hint. "
             "During times of great resistance, the generals insisted on Tin foil hats, "
             "the leaders advocated for Evacuation, and individual dogs formed units to build a Dome. "
         )
     },
-    "CARTONKI": {
+    "Gems Winter Store": {
         "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",
         "description": (
             "**Gift box**\n"
             "by Gems Winter Store\n\n"
+            "Rarity: Rare\n\n"
             "Happy New Year! May 2025 bring you inspiration, good fortune, and countless joyful moments."
+    },
+    "The Seven Virtues": {
+        "image": "https://i.ibb.co/ympwRnF8/TheSevenVirtues.png",
+        "description": (
+            "**Patience Postmark**\n"
+            "by The Seven Virtues\n\n"
+            "Rarity: Rare\n\n"
+            "The Seven Virtues is a collaboration between the artist Olyabolyaboo and Cheques Corp., continuing the narrative of "The Seven Deadly Sins" "
+            "While the sins made us reflect on our weaknesses, this collection inspires action. Humility, generosity, "
+            "patience, purity, kindness, temperance, and diligence — seven principles that create a new story. "
+            "This drop is a symbol of the bright side of your inner strength. "
+        },
+    "Ton Space Badges": {
+        "image": "https://i.ibb.co/LDDnhfXy/TonSpaceBadges.png",
+        "description": (
+            "**Gold Badge**\n"
+            "by Ton Space Badges\n\n"
+            "TON Space Badges is an exclusive NFT collection by TON Space.  "
+            "Forged in the early orbit of the TON ecosystem, these badges were unlocked by users who fueled their journey with Stars. "
+            "Each badge is a limited collectible — a snapshot of early activity within TON Space. No remints. "
+            "No second drops. Just verifiable proof you were early. "
         )
     }
 }
@@ -77,39 +101,51 @@ STICKER_COLLECTIONS = {
     "Not Coin": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "**- Not Meme**\n"
+            "**- Not Meme #2015**\n\n"
             "Price: from 299 Ton\n\n"
+            "Probably nothing"
         )
     },
     "Lost Dogs": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "**- Magic of the Way**\n"
+            "**- Magic of the Way #2871**\n\n"
             "Price: from 9.99 Ton\n\n"
+            "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun?"
         )
     },
     "Not pixel": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "**- Vice City**\n"
+            "**- Vice Pixel #1736**\n"
             "Price: from 9.99 Ton\n\n"
-            "**- Dogs pixel**\n"
+            "**- Dogs Pixel #1023**\n"
             "Price: from 4.99 Ton\n\n"
-            "**- Grass**\n"
+            "**- Grass Pixel #2536**\n"
             "Price: from 4.99 Ton\n\n"
+            "**- Mac Pixel #1736**\n\n"
+            "Price: from 4.99 Ton\n\n"
+            "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex"
         )
     },
     "Dogs OG": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "**- Bow Tie**\n"
+            "**- Bow Tie #4780**\n"
             "Price: from 6.99 Ton\n\n"
-            "**- One Piece**\n"
+            "**- One Piece #6673**\n"
             "Price: from 5.99 Ton\n\n"
-            "**- Panama**\n"
+            "**- Panama #1417**\n"
             "Price: from 3.99 Ton\n\n"
-            "**- Kamikaze**\n"
+            "**- Kamikaze #4812**\n\n"
             "Price: from 2.99 Ton\n\n"
+            "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)!"
+       },
+    "Dogs Rewards": {
+        "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
+        "description": (
+            "**- Full dig #4453**\n\n"
+            "Price: from 9.99 Ton\n" 
         )
     }
 }
@@ -117,7 +153,7 @@ STICKER_COLLECTIONS = {
 # Контакт для покупки/обмена
 CONTACT_USER = "jamside_ay_lol"
 
-# ===== КЛАВИАТУРЫ =====
+# ===== Кнопошки =====
 def main_menu_keyboard():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("NFT", callback_data="nft_menu")],
@@ -159,7 +195,7 @@ def sticker_detail_keyboard(sticker_name):
         ]
     ])
 
-# ===== ОБРАБОТЧИКИ =====
+# ===== Обработка =====
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик команды /start"""
     user_data = context.user_data
@@ -410,11 +446,11 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     except Exception as e:
         logger.error(f"Ошибка в обработчике кнопок: {e}")
         try:
-            await query.answer("⚠️ Произошла ошибка, попробуйте позже")
+            await query.answer("⚠️ An error occurred, please try again later")
         except:
             pass
 
-# ===== ВЕБ-СЕРВЕР ДЛЯ UPTIMEROBOT =====
+# ===== ВЕБ-СЕРВЕР =====
 def run_flask_server():
     app = Flask(__name__)
 
@@ -444,7 +480,6 @@ def keep_alive():
         except Exception as e:
             logger.error(f"Ошибка при пробуждении: {e}")
         
-        # Ждем 14 минут перед следующим запросом
         time.sleep(14 * 60)  # 14 минут
 
 # ===== ЗАПУСК БОТА И СЕРВЕРА =====
@@ -478,7 +513,7 @@ def main() -> None:
     
     # Настройки для работы с несколькими пользователями
     max_retries = 5
-    retry_delay = 10  # секунд
+    retry_delay = 10  # секунды
     
     for attempt in range(max_retries):
         try:
