@@ -142,7 +142,8 @@ STICKER_COLLECTIONS = {
             "**- Kamikaze #4812**\n\n"
             "Price: from 2.99 Ton\n\n"
             "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)!"
-       },
+        )
+    },
     "Dogs Rewards": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
