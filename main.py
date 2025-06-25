@@ -429,6 +429,24 @@ def run_flask_server():
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
 
+# ===== ФУНКЦИЯ ДЛЯ ПОДДЕРЖАНИЯ АКТИВНОСТИ НА RENDER =====
+def keep_alive():
+    """Регулярно отправляет запросы к серверу, чтобы бот не отключался"""
+    while True:
+        try:
+            # Получаем URL сервера из переменной окружения
+            server_url = os.environ.get('RENDER_EXTERNAL_URL', 'http://localhost:10000')
+            health_url = f"{server_url}/health"
+            
+            # Отправляем запрос к health-эндпоинту
+            response = requests.get(health_url, timeout=10)
+            logger.info(f"Отправлен запрос на пробуждение! Статус: {response.status_code}")
+        except Exception as e:
+            logger.error(f"Ошибка при пробуждении: {e}")
+        
+        # Ждем 14 минут перед следующим запросом
+        time.sleep(14 * 60)  # 14 минут
+
 # ===== ЗАПУСК БОТА И СЕРВЕРА =====
 def main() -> None:
     if not BOT_TOKEN:
@@ -440,6 +458,16 @@ def main() -> None:
     server_thread.daemon = True
     server_thread.start()
     logger.info(f"🌐 HTTP server running on port {os.environ.get('PORT', 10000)}")
+
+    # Запускаем фоновый процесс для поддержания активности
+    if os.environ.get('RENDER'):
+        # Только на Render запускаем пробуждение
+        wakeup_thread = threading.Thread(target=keep_alive)
+        wakeup_thread.daemon = True
+        wakeup_thread.start()
+        logger.info("🔔 Запущена функция поддержания активности (интервал: 14 минут)")
+    else:
+        logger.info("🖥️ Локальный запуск - функция поддержания активности отключена")
 
     # Создаем и запускаем бота в основном потоке
     application = Application.builder().token(BOT_TOKEN).build()
