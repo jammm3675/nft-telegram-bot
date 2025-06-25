@@ -116,7 +116,7 @@ STICKER_COLLECTIONS = {
             "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun?\n\n"
         )
     },
-    "Not pixel": {
+    "Not Pixel": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
             "**- Vice Pixel #1736**\n"
