@@ -125,7 +125,7 @@ STICKER_COLLECTIONS = {
             "Price: from 4.99 Ton\n\n"
             "**- Grass Pixel #2536**\n"
             "Price: from 4.99 Ton\n\n"
-            "**- Mac Pixel #1736**\n\n"
+            "**- Mac Pixel #1736**\n"
             "Price: from 4.99 Ton\n\n\n"
             "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex\n\n"
         )
