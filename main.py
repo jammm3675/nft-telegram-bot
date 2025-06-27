@@ -173,10 +173,10 @@ def nft_menu_keyboard():
 def nft_detail_keyboard(nft_name):
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("💬 DM for exchange", url=f"https://t.me/{CONTACT_USER}"),
-            InlineKeyboardButton("🏠 Home", callback_data="home")
+            InlineKeyboardButton("⬅️ Back", callback_data="back_nft"),
+            InlineKeyboardButton("💬 DM for exchange", url=f"https://t.me/{CONTACT_USER}")
         ],
-        [InlineKeyboardButton("⬅️ Back", callback_data="back_nft")]
+        [InlineKeyboardButton("🏠 Home", callback_data="home")]
     ])
 
 def stickers_menu_keyboard():
