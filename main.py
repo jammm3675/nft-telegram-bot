@@ -135,7 +135,7 @@ STICKER_COLLECTIONS = {
         "description": (
             "•Dogs Pixel #1023 - from 4.99 Ton   \n\n"
             "•Grass Pixel #2536 - from 4.99 Ton   \n\n"
-            "•Mac Pixel #1736 - from 4.99 Ton   \n\n"
+            "•Mac Pixel #3071 - from 4.99 Ton   \n\n"
             "•Vice Pixel #1736 - from 9.99 Ton   \n\n"
             "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex "
         )
