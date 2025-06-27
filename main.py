@@ -103,41 +103,41 @@ STICKER_COLLECTIONS = {
     "Not Coin": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "• Not Meme #2015 - from 299 Ton   \n\n"
+            "•Not Meme #2015 - from 299 Ton   \n\n"
             "Probably nothing "
         )
     },
     "Lost Dogs": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "• Magic of the Way #2871 - from 9.99 Ton   \n\n"
+            "•Magic of the Way #2871 - from 9.99 Ton   \n\n"
             "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun? "
         )
     },
     "Not Pixel": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "• Vice Pixel #1736 - from 9.99 Ton   \n\n"
-            "• Dogs Pixel #1023 - from 4.99 Ton   \n\n"
-            "• Grass Pixel #2536 - from 4.99 Ton   \n\n"
-            "• Mac Pixel #1736 - from 4.99 Ton   \n\n"
+            "•Vice Pixel #1736 - from 9.99 Ton   \n\n"
+            "•Dogs Pixel #1023 - from 4.99 Ton   \n\n"
+            "•Grass Pixel #2536 - from 4.99 Ton   \n\n"
+            "•Mac Pixel #1736 - from 4.99 Ton   \n\n"
             "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex "
         )
     },
     "Dogs OG": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "• Bow Tie #4780 - from 6.99 Ton   \n\n"
-            "• One Piece #6673 - from 5.99 Ton   \n\n"
-            "• Panama #1417 - from 3.99 Ton   \n\n"
-            "• Kamikaze #4812 - from 2.99 Ton   \n\n"
+            "•Bow Tie #4780 - from 6.99 Ton   \n\n"
+            "•One Piece #6673 - from 5.99 Ton   \n\n"
+            "•Panama #1417 - from 3.99 Ton   \n\n"
+            "•Kamikaze #4812 - from 2.99 Ton   \n\n"
             "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)! "
         )
     },
     "Dogs Rewards": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "• Full dig #4453 - from 9.99 Ton   \n\n"
+            "•Full dig #4453 - from 9.99 Ton   \n\n"
         )
     }
 }
