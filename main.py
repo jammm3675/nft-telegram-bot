@@ -16,10 +16,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ===== КОНФИГУРАЦИЯ =====
 BOT_TOKEN = os.environ.get('BOT_TOKEN', '7953613164:AAF2sa_5nwE45LCcn-7dB_saJOPnPS_Z0F8')
 
-# Описания NFT коллекций (алфавитный порядок)
 NFT_COLLECTIONS = {
     "Gems Winter Store": {
         "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",
@@ -98,7 +96,6 @@ NFT_COLLECTIONS = {
     }
 }
 
-# Стикерпаки с описаниями (алфавитный порядок)
 STICKER_COLLECTIONS = {
     "Dogs OG": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
@@ -142,10 +139,8 @@ STICKER_COLLECTIONS = {
     }
 }
 
-# Контакт для покупки/обмена
 CONTACT_USER = "jamside_ay_lol"
 
-# ===== Кнопошки =====
 def main_menu_keyboard():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("NFT", callback_data="nft_menu")],
@@ -187,12 +182,10 @@ def sticker_detail_keyboard(sticker_name):
         ]
     ])
 
-# ===== Обработка =====
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Обработчик команды /start"""
+    """Command handler /start"""
     user_data = context.user_data
     
-    # Полная очистка предыдущего состояния
     if 'base_message_id' in user_data:
         try:
             await context.bot.delete_message(
@@ -202,33 +195,29 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         except TelegramError:
             pass
     
-    # Сбрасываем состояние
     user_data.clear()
     user_data['temp_messages'] = []
     
-    # Создаем новое основное сообщение
     await show_main_menu(update, context, is_new=True)
 
 async def cleanup_temp_messages(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
-    """Удаляет все временные сообщения и очищает список"""
+    """Deletes all temporary messages and clears the list"""
     user_data = context.user_data
     if 'temp_messages' not in user_data:
         return
     
-    # Удаляем сообщения в обратном порядке (новые сначала)
     for msg_id in reversed(user_data['temp_messages']):
         try:
             await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
-            logger.info(f"Удалено временное сообщение: {msg_id}")
+            logger.info(f"Temporary message removed: {msg_id}")
         except TelegramError as e:
             if "message to delete not found" not in str(e).lower():
-                logger.error(f"Ошибка удаления сообщения {msg_id}: {e}")
+                logger.error(f"Error deleting message {msg_id}: {e}")
     
-    # Очищаем список
     user_data['temp_messages'] = []
 
 async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_new=False) -> None:
-    """Показывает главное меню"""
+    """Shows the main menu"""
     chat_id = update.effective_chat.id
     user_data = context.user_data
     text = (
@@ -240,11 +229,9 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
         "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️"
     )
     
-    # Всегда очищаем временные сообщения при показе главного меню
     await cleanup_temp_messages(context, chat_id)
     
     if is_new or 'base_message_id' not in user_data:
-        # Создаем новое основное сообщение
         message = await context.bot.send_message(
             chat_id=chat_id,
             text=text,
@@ -252,10 +239,9 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
             parse_mode="Markdown"
         )
         user_data['base_message_id'] = message.message_id
-        logger.info(f"Создано новое основное сообщение: {message.message_id}")
+        logger.info(f"New main message created: {message.message_id}")
     else:
         try:
-            # Редактируем существующее сообщение
             await context.bot.edit_message_text(
                 chat_id=chat_id,
                 message_id=user_data['base_message_id'],
@@ -263,14 +249,12 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
                 reply_markup=main_menu_keyboard(),
                 parse_mode="Markdown"
             )
-            logger.info(f"Обновлено основное сообщение: {user_data['base_message_id']}")
+            logger.info(f"Main message updated: {user_data['base_message_id']}")
         except BadRequest as e:
             if "message is not modified" in str(e).lower():
-                # Игнорируем если сообщение не изменилось
-                logger.info("Сообщение не требует изменений (main menu)")
+                logger.info("The message does not require changes (main menu)")
             else:
-                logger.error(f"Ошибка главного меню: {e}")
-                # Создаем новое сообщение при серьезной ошибке
+                logger.error(f"Main menu error: {e}")
                 message = await context.bot.send_message(
                     chat_id=chat_id,
                     text=text,
@@ -278,20 +262,18 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
                     parse_mode="Markdown"
                 )
                 user_data['base_message_id'] = message.message_id
-                logger.info(f"Создано новое основное сообщение из-за ошибки: {message.message_id}")
+                logger.info(f"New main message created due to error: {message.message_id}")
 
 async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Показывает меню NFT"""
+    """Shows the NFT menu"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat_id
     user_data = context.user_data
     
-    # Очищаем временные сообщения
     await cleanup_temp_messages(context, chat_id)
     
     try:
-        # Редактируем основное сообщение
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=user_data['base_message_id'],
@@ -299,29 +281,26 @@ async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             reply_markup=nft_menu_keyboard(),
             parse_mode="Markdown"
         )
-        logger.info(f"Показано меню NFT в сообщении {user_data['base_message_id']}")
+        logger.info(f"NFT menu shown in message {user_data['base_message_id']}")
     except BadRequest as e:
         if "message is not modified" in str(e).lower():
-            logger.info("Сообщение NFT не требует изменений")
+            logger.info("The NFT message does not require modifications")
         else:
-            logger.error(f"Ошибка меню NFT: {e}")
-            # При критической ошибке создаем новое основное сообщение
+            logger.error(f"NFT menu error: {e}")
             await show_main_menu(update, context, is_new=True)
 
 async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nft_name: str) -> None:
-    """Показывает детали NFT"""
+    """Shows NFT details"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat_id
     user_data = context.user_data
     
-    # Очищаем предыдущие временные сообщения
     await cleanup_temp_messages(context, chat_id)
     
     nft = NFT_COLLECTIONS[nft_name]
     
     try:
-        # Отправляем временное сообщение с изображением
         message = await context.bot.send_photo(
             chat_id=chat_id,
             photo=nft['image'],
@@ -330,13 +309,11 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
             parse_mode="Markdown"
         )
         
-        # Сохраняем ID временного сообщения
         user_data.setdefault('temp_messages', []).append(message.message_id)
-        logger.info(f"Создано временное сообщение NFT: {message.message_id}")
+        logger.info(f"Temporary NFT message created: {message.message_id}")
         
     except Exception as e:
         logger.error(f"Ошибка деталей NFT: {e}")
-        # Отправляем текстовое сообщение как запасной вариант
         message = await context.bot.send_message(
             chat_id=chat_id,
             text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Image is temporarily unavailable",
@@ -344,20 +321,18 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
             parse_mode="Markdown"
         )
         user_data.setdefault('temp_messages', []).append(message.message_id)
-        logger.info(f"Создано текстовое временное сообщение NFT: {message.message_id}")
+        logger.info(f"NFT text temporary message created: {message.message_id}")
 
 async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Показывает меню стикеров"""
+    """Shows the sticker menu"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat_id
     user_data = context.user_data
     
-    # Очищаем временные сообщения
     await cleanup_temp_messages(context, chat_id)
     
     try:
-        # Редактируем основное сообщение
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=user_data['base_message_id'],
@@ -365,30 +340,27 @@ async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
             reply_markup=stickers_menu_keyboard(),
             parse_mode="Markdown"
         )
-        logger.info(f"Показано меню стикеров в сообщении {user_data['base_message_id']}")
+        logger.info(f"Showing sticker menu in message {user_data['base_message_id']}")
     except BadRequest as e:
         if "message is not modified" in str(e).lower():
-            logger.info("Сообщение стикеров не требует изменений")
+            logger.info("The sticker message does not require any changes.")
         else:
-            logger.error(f"Ошибка меню стикеров: {e}")
-            # При критической ошибке создаем новое основное сообщение
+            logger.error(f"Sticker menu error: {e}")
             await show_main_menu(update, context, is_new=True)
 
 async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, sticker_name: str) -> None:
-    """Показывает детали стикерпака"""
+    """Shows sticker pack details"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat_id
     user_data = context.user_data
     
-    # Очищаем временные сообщения
     await cleanup_temp_messages(context, chat_id)
     
     sticker_data = STICKER_COLLECTIONS[sticker_name]
     text = f"✨ **{sticker_name}** ✨\n\n{sticker_data['description']}\n"
     
     try:
-        # Редактируем основное сообщение
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=user_data['base_message_id'],
@@ -396,24 +368,21 @@ async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE
             reply_markup=sticker_detail_keyboard(sticker_name),
             parse_mode="Markdown"
         )
-        logger.info(f"Показаны детали стикера в сообщении {user_data['base_message_id']}")
+        logger.info(f"Showing sticker details in message {user_data['base_message_id']}")
     except BadRequest as e:
         if "message is not modified" in str(e).lower():
-            logger.info("Сообщение деталей стикера не требует изменений")
+            logger.info("The sticker details message does not require any changes")
         else:
-            logger.error(f"Ошибка деталей стикера: {e}")
-            # При критической ошибке создаем новое основное сообщение
+            logger.error(f"Sticker details error: {e}")
             await show_main_menu(update, context, is_new=True)
 
 async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Обработчик кнопки Back в NFT"""
+    """NFT Back Button Handler"""
     query = update.callback_query
     await query.answer()
     
-    # Очищаем временные сообщения
     await cleanup_temp_messages(context, query.message.chat_id)
     
-    # Возвращаемся в меню NFT
     await show_nft_menu(update, context)
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -437,13 +406,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         elif data == "back_nft":
             await handle_back_nft(update, context)
     except Exception as e:
-        logger.error(f"Ошибка в обработчике кнопок: {e}")
+        logger.error(f"Error in button handler: {e}")
         try:
             await query.answer("⚠️ An error occurred, please try again later")
         except:
             pass
 
-# ===== ВЕБ-СЕРВЕР =====
 def run_flask_server():
     app = Flask(__name__)
 
@@ -458,55 +426,46 @@ def run_flask_server():
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
 
-# ===== ФУНКЦИЯ ДЛЯ ПОДДЕРЖАНИЯ АКТИВНОСТИ НА RENDER =====
 def keep_alive():
-    """Регулярно отправляет запросы к серверу, чтобы бот не отключался"""
+    """Regularly sends requests to the server so that the bot does not disconnect"""
     while True:
         try:
-            # Получаем URL сервера из переменной окружения
             server_url = os.environ.get('RENDER_EXTERNAL_URL', 'http://localhost:10000')
             health_url = f"{server_url}/health"
             
-            # Отправляем запрос к health-эндпоинту
             response = requests.get(health_url, timeout=10)
-            logger.info(f"Отправлен запрос на пробуждение! Статус: {response.status_code}")
+            logger.info(f"Wake up request sent! Status: {response.status_code}")
         except Exception as e:
-            logger.error(f"Ошибка при пробуждении: {e}")
+            logger.error(f"Error while waking up: {e}")
         
-        time.sleep(14 * 60)  # 14 минут
+        time.sleep(14 * 60)
 
-# ===== ЗАПУСК БОТА И СЕРВЕРА =====
 def main() -> None:
     if not BOT_TOKEN:
-        logger.error("❌ BOT_TOKEN не установлен!")
+        logger.error("❌ BOT_TOKEN not installed!")
         return
 
-    # Запускаем HTTP сервер в отдельном потоке
     server_thread = threading.Thread(target=run_flask_server)
     server_thread.daemon = True
     server_thread.start()
     logger.info(f"🌐 HTTP server running on port {os.environ.get('PORT', 10000)}")
 
-    # Запускаем фоновый процесс для поддержания активности
     if os.environ.get('RENDER'):
-        # Только на Render запускаем пробуждение
         wakeup_thread = threading.Thread(target=keep_alive)
         wakeup_thread.daemon = True
         wakeup_thread.start()
-        logger.info("🔔 Запущена функция поддержания активности (интервал: 14 минут)")
+        logger.info("🔔Keep-alive function started (interval: 14 minutes)")
     else:
-        logger.info("🖥️ Локальный запуск - функция поддержания активности отключена")
+        logger.info("🖥️ Local Launch - Keep Alive feature disabled")
 
-    # Создаем и запускаем бота в основном потоке
     application = Application.builder().token(BOT_TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_handler))
 
     logger.info("🤖 Бот запущен! Ожидание сообщений...")
     
-    # Настройки для работы с несколькими пользователями
     max_retries = 5
-    retry_delay = 10  # секунды
+    retry_delay = 10
     
     for attempt in range(max_retries):
         try:
