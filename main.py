@@ -19,17 +19,26 @@ logger = logging.getLogger(__name__)
 # ===== КОНФИГУРАЦИЯ =====
 BOT_TOKEN = os.environ.get('BOT_TOKEN', '7953613164:AAF2sa_5nwE45LCcn-7dB_saJOPnPS_Z0F8')
 
-# Описания NFT коллекций
+# Описания NFT коллекций (алфавитный порядок)
 NFT_COLLECTIONS = {
-    "Postmarks: The Jaegers": {
-        "image": "https://i.ibb.co/MyCJ8J33/NIX.png",
+    "Gems Winter Store": {
+        "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",
         "description": (
-            "**NIX**\n"
-            "by Postmarks: The Jaegers\n\n"
+            "**Gift box**\n"
+            "by Gems Winter Store\n\n"
             "Rarity: Rare\n\n"
-            "**Story**: Once one of the Jaegers tried to fight one of the ancient titans "
-            "in the Pacific Ocean, but was defeated and now his body lies lifeless at a depth of 10 kilometers. "
-            "But who knows, maybe he's just accumulating energy.\n"
+            "Happy New Year! May 2025 bring you inspiration, good fortune, and countless joyful moments."
+        )
+    },
+    "Lost Dogs: The Hint": {
+        "image": "https://i.ibb.co/gZ20qd68/Lost-Dogs.png",
+        "description": (
+            "**The League**\n"
+            "by Lost Dogs: The Hint\n\n"
+            "Rarity: Rare\n\n"
+            "Sometimes you need to look at the bigger picture to understand the hint. "
+            "During times of great resistance, the generals insisted on Tin foil hats, "
+            "the leaders advocated for Evacuation, and individual dogs formed units to build a Dome. "
         )
     },
     "Medieval Deck": {
@@ -53,24 +62,15 @@ NFT_COLLECTIONS = {
             "but lost in delirium."
         )
     },
-    "Lost Dogs: The Hint": {
-        "image": "https://i.ibb.co/gZ20qd68/Lost-Dogs.png",
+    "Postmarks: The Jaegers": {
+        "image": "https://i.ibb.co/MyCJ8J33/NIX.png",
         "description": (
-            "**The League**\n"
-            "by Lost Dogs: The Hint\n\n"
+            "**NIX**\n"
+            "by Postmarks: The Jaegers\n\n"
             "Rarity: Rare\n\n"
-            "Sometimes you need to look at the bigger picture to understand the hint. "
-            "During times of great resistance, the generals insisted on Tin foil hats, "
-            "the leaders advocated for Evacuation, and individual dogs formed units to build a Dome. "
-        )
-    },
-    "Gems Winter Store": {
-        "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",
-        "description": (
-            "**Gift box**\n"
-            "by Gems Winter Store\n\n"
-            "Rarity: Rare\n\n"
-            "Happy New Year! May 2025 bring you inspiration, good fortune, and countless joyful moments."
+            "**Story**: Once one of the Jaegers tried to fight one of the ancient titans "
+            "in the Pacific Ocean, but was defeated and now his body lies lifeless at a depth of 10 kilometers. "
+            "But who knows, maybe he's just accumulating energy.\n"
         )
     },
     "The Seven Virtues": {
@@ -98,13 +98,22 @@ NFT_COLLECTIONS = {
     }
 }
 
-# Стикерпаки с описаниями
+# Стикерпаки с описаниями (алфавитный порядок)
 STICKER_COLLECTIONS = {
-    "Not Coin": {
+    "Dogs OG": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "•Not Meme #2015 - from 299 Ton   \n\n"
-            "Probably nothing "
+            "•Bow Tie #4780 - from 6.99 Ton   \n\n"
+            "•Kamikaze #4812 - from 2.99 Ton   \n\n"
+            "•One Piece #6673 - from 5.99 Ton   \n\n"
+            "•Panama #1417 - from 3.99 Ton   \n\n"
+            "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)! "
+        )
+    },
+    "Dogs Rewards": {
+        "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
+        "description": (
+            "•Full dig #4453 - from 9.99 Ton   \n\n"
         )
     },
     "Lost Dogs": {
@@ -114,30 +123,21 @@ STICKER_COLLECTIONS = {
             "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun? "
         )
     },
+    "Not Coin": {
+        "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
+        "description": (
+            "•Not Meme #2015 - from 299 Ton   \n\n"
+            "Probably nothing "
+        )
+    },
     "Not Pixel": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "•Vice Pixel #1736 - from 9.99 Ton   \n\n"
             "•Dogs Pixel #1023 - from 4.99 Ton   \n\n"
             "•Grass Pixel #2536 - from 4.99 Ton   \n\n"
             "•Mac Pixel #1736 - from 4.99 Ton   \n\n"
+            "•Vice Pixel #1736 - from 9.99 Ton   \n\n"
             "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex "
-        )
-    },
-    "Dogs OG": {
-        "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
-        "description": (
-            "•Bow Tie #4780 - from 6.99 Ton   \n\n"
-            "•One Piece #6673 - from 5.99 Ton   \n\n"
-            "•Panama #1417 - from 3.99 Ton   \n\n"
-            "•Kamikaze #4812 - from 2.99 Ton   \n\n"
-            "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)! "
-        )
-    },
-    "Dogs Rewards": {
-        "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
-        "description": (
-            "•Full dig #4453 - from 9.99 Ton   \n\n"
         )
     }
 }
@@ -232,10 +232,12 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
     chat_id = update.effective_chat.id
     user_data = context.user_data
     text = (
-        "🌟 **NFTs for sale** 🌟\n\n"
-        "This bot represents all NFTs that are ready to pass into the hands of a new owner :) \n\n"
-        "To avoid scams, transactions are conducted through: @GiftElfRobot \n\n"
-        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️\n"
+        "🌟 **Welcome to the Showcase!** 🌟\n\n"
+        "This bot will help you find NFTs that are ready to be sold to a new owner via secure transactions. \n\n"
+        "🔎 How to use: \n"
+        "1️⃣ Browse available NFT and Sticker offers in the bot. \n"
+        "2️⃣ All sales and trades are conducted securely via @GiftElfRobot to prevent fraud.  \n\n"
+        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️"
     )
     
     # Всегда очищаем временные сообщения при показе главного меню
