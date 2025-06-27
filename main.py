@@ -70,7 +70,7 @@ NFT_COLLECTIONS = {
             "Rarity: Rare\n\n"
             "**Story**: Once one of the Jaegers tried to fight one of the ancient titans "
             "in the Pacific Ocean, but was defeated and now his body lies lifeless at a depth of 10 kilometers. "
-            "But who knows, maybe he's just accumulating energy.\n"
+            "But who knows, maybe he's just accumulating energy."
         )
     },
     "The Seven Virtues": {
