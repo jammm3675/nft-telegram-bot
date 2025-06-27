@@ -246,8 +246,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
         "🌟 **NFTs for sale** 🌟\n\n"
         "This bot represents all NFTs that are ready to pass into the hands of a new owner :) \n\n"
         "To avoid scams, transactions are conducted through: @GiftElfRobot \n\n"
-        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️\n\n\n"
-        "bot by jammm 🐱"
+        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️\n"
     )
     
     # Всегда очищаем временные сообщения при показе главного меню
