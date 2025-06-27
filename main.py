@@ -113,7 +113,7 @@ STICKER_COLLECTIONS = {
     "Dogs Rewards": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "•Full dig #4453 - from 9.99 Ton   \n\n"
+            "•Full dig #4453 - from 9.99 Ton     \n\n"
         )
     },
     "Lost Dogs": {
