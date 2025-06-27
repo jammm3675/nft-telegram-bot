@@ -105,7 +105,7 @@ STICKER_COLLECTIONS = {
         "description": (
             "• Not Meme #2015  \n\n"
             "**Price:** from 299 Ton\n\n\n"
-            "Probably nothing\n\n"
+            "Probably nothing "
         )
     },
     "Lost Dogs": {
@@ -113,7 +113,7 @@ STICKER_COLLECTIONS = {
         "description": (
             "• Magic of the Way #2871  \n\n"
             "**Price:** from 9.99 Ton\n\n\n"
-            "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun?\n\n"
+            "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun? "
         )
     },
     "Not Pixel": {
@@ -127,7 +127,7 @@ STICKER_COLLECTIONS = {
             "**Price:** from 4.99 Ton\n\n"
             "• Mac Pixel #1736  \n"
             "**Price:** from 4.99 Ton\n\n\n"
-            "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex\n\n"
+            "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex "
         )
     },
     "Dogs OG": {
@@ -141,7 +141,7 @@ STICKER_COLLECTIONS = {
             "**Price:** from 3.99 Ton\n\n"
             "• Kamikaze #4812  \n\n"
             "**Price:** from 2.99 Ton\n\n\n"
-            "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)!\n\n"
+            "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)! "
         )
     },
     "Dogs Rewards": {
