@@ -167,7 +167,7 @@ def nft_menu_keyboard():
     buttons = []
     for nft_name in NFT_COLLECTIONS:
         buttons.append([InlineKeyboardButton(nft_name, callback_data=f"nft_{nft_name}")])
-    buttons.append([InlineKeyboardButton("🔙 Back", callback_data="home")])
+    buttons.append([InlineKeyboardButton("⬅️ Back", callback_data="home")])
     return InlineKeyboardMarkup(buttons)
 
 def nft_detail_keyboard(nft_name):
@@ -176,24 +176,24 @@ def nft_detail_keyboard(nft_name):
             InlineKeyboardButton("💬 DM for exchange", url=f"https://t.me/{CONTACT_USER}"),
             InlineKeyboardButton("🏠 Home", callback_data="home")
         ],
-        [InlineKeyboardButton("🔙 Back", callback_data="back_nft")]
+        [InlineKeyboardButton("⬅️ Back", callback_data="back_nft")]
     ])
 
 def stickers_menu_keyboard():
     buttons = []
     for sticker_name in STICKER_COLLECTIONS:
         buttons.append([InlineKeyboardButton(sticker_name, callback_data=f"sticker_{sticker_name}")])
-    buttons.append([InlineKeyboardButton("🔙 Back", callback_data="home")])
+    buttons.append([InlineKeyboardButton("⬅️ Back", callback_data="home")])
     return InlineKeyboardMarkup(buttons)
 
 def sticker_detail_keyboard(sticker_name):
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("🖼️ Look at the stickers", url=STICKER_COLLECTIONS[sticker_name]["sticker_url"]),
+            InlineKeyboardButton("🖼️ View stickers", url=STICKER_COLLECTIONS[sticker_name]["sticker_url"]),
             InlineKeyboardButton("💬 DM for Purchase", url=f"https://t.me/{CONTACT_USER}")
         ],
         [
-            InlineKeyboardButton("🔙 Back", callback_data="stickers_menu"),
+            InlineKeyboardButton("⬅️ Back", callback_data="stickers_menu"),
             InlineKeyboardButton("🏠 Home", callback_data="home")
         ]
     ])
