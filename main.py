@@ -258,7 +258,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
             chat_id=chat_id,
             text=text,
             reply_markup=main_menu_keyboard(),
-            parse_mode="MarkdownV2"
+            parse_mode="Markdown"
         )
         user_data['base_message_id'] = message.message_id
         logger.info(f"Создано новое основное сообщение: {message.message_id}")
@@ -270,7 +270,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
                 message_id=user_data['base_message_id'],
                 text=text,
                 reply_markup=main_menu_keyboard(),
-                parse_mode="MarkdownV2"
+                parse_mode="Markdown"
             )
             logger.info(f"Обновлено основное сообщение: {user_data['base_message_id']}")
         except BadRequest as e:
@@ -284,7 +284,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
                     chat_id=chat_id,
                     text=text,
                     reply_markup=main_menu_keyboard(),
-                    parse_mode="MarkdownV2"
+                    parse_mode="Markdown"
                 )
                 user_data['base_message_id'] = message.message_id
                 logger.info(f"Создано новое основное сообщение из-за ошибки: {message.message_id}")
@@ -306,7 +306,7 @@ async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             message_id=user_data['base_message_id'],
             text="🎨 **NFT Collections**\n\nSelect an NFT to view:",
             reply_markup=nft_menu_keyboard(),
-            parse_mode="MarkdownV2"
+            parse_mode="Markdown"
         )
         logger.info(f"Показано меню NFT в сообщении {user_data['base_message_id']}")
     except BadRequest as e:
@@ -336,7 +336,7 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
             photo=nft['image'],
             caption=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange",
             reply_markup=nft_detail_keyboard(nft_name),
-            parse_mode="MarkdownV2"
+            parse_mode="Markdown"
         )
         
         # Сохраняем ID временного сообщения
@@ -350,7 +350,7 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
             chat_id=chat_id,
             text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Image is temporarily unavailable",
             reply_markup=nft_detail_keyboard(nft_name),
-            parse_mode="MarkdownV2"
+            parse_mode="Markdown"
         )
         user_data.setdefault('temp_messages', []).append(message.message_id)
         logger.info(f"Создано текстовое временное сообщение NFT: {message.message_id}")
@@ -372,7 +372,7 @@ async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
             message_id=user_data['base_message_id'],
             text="🎭 **Stickerpacks**\n\nSelect a sticker collection:",
             reply_markup=stickers_menu_keyboard(),
-            parse_mode="MarkdownV2"
+            parse_mode="Markdown"
         )
         logger.info(f"Показано меню стикеров в сообщении {user_data['base_message_id']}")
     except BadRequest as e:
@@ -403,7 +403,7 @@ async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE
             message_id=user_data['base_message_id'],
             text=text,
             reply_markup=sticker_detail_keyboard(sticker_name),
-            parse_mode="MarkdownV2"
+            parse_mode="Markdown"
         )
         logger.info(f"Показаны детали стикера в сообщении {user_data['base_message_id']}")
     except BadRequest as e:
