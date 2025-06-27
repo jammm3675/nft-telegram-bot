@@ -103,52 +103,52 @@ STICKER_COLLECTIONS = {
     "Not Coin": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "**- Not Meme #2015**\n\n"
-            "Price: from 299 Ton\n\n\n"
+            "• Not Meme #2015  \n\n"
+            "**Price:** from 299 Ton\n\n\n"
             "Probably nothing\n\n"
         )
     },
     "Lost Dogs": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "**- Magic of the Way #2871**\n\n"
-            "Price: from 9.99 Ton\n\n\n"
+            "• Magic of the Way #2871  \n\n"
+            "**Price:** from 9.99 Ton\n\n\n"
             "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun?\n\n"
         )
     },
     "Not Pixel": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "**- Vice Pixel #1736**\n"
-            "Price: from 9.99 Ton\n\n"
-            "**- Dogs Pixel #1023**\n"
-            "Price: from 4.99 Ton\n\n"
-            "**- Grass Pixel #2536**\n"
-            "Price: from 4.99 Ton\n\n"
-            "**- Mac Pixel #1736**\n"
-            "Price: from 4.99 Ton\n\n\n"
+            "• Vice Pixel #1736  \n"
+            "**Price:** from 9.99 Ton\n\n"
+            "• Dogs Pixel #1023  \n"
+            "**Price:** from 4.99 Ton\n\n"
+            "• Grass Pixel #2536  \n"
+            "**Price:** from 4.99 Ton\n\n"
+            "• Mac Pixel #1736  \n"
+            "**Price:** from 4.99 Ton\n\n\n"
             "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex\n\n"
         )
     },
     "Dogs OG": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "**- Bow Tie #4780**\n"
-            "Price: from 6.99 Ton\n\n"
-            "**- One Piece #6673**\n"
-            "Price: from 5.99 Ton\n\n"
-            "**- Panama #1417**\n"
-            "Price: from 3.99 Ton\n\n"
-            "**- Kamikaze #4812**\n\n"
-            "Price: from 2.99 Ton\n\n\n"
+            "• Bow Tie #4780  \n"
+            "**Price:** from 6.99 Ton\n\n"
+            "• One Piece #6673  \n"
+            "**Price:** from 5.99 Ton\n\n"
+            "• Panama #1417  \n"
+            "**Price:** from 3.99 Ton\n\n"
+            "• Kamikaze #4812  \n\n"
+            "**Price:** from 2.99 Ton\n\n\n"
             "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)!\n\n"
         )
     },
     "Dogs Rewards": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "**- Full dig #4453**\n\n"
-            "Price: from 9.99 Ton\n" 
+            "• Full dig #4453  \n\n"
+            "**Price:** from 9.99 Ton\n" 
         )
     }
 }
@@ -304,7 +304,7 @@ async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=user_data['base_message_id'],
-            text="🎨 **NFT Collections**\nSelect an NFT to view:",
+            text="🎨 **NFT Collections**\n\nSelect an NFT to view:",
             reply_markup=nft_menu_keyboard(),
             parse_mode="Markdown"
         )
@@ -370,7 +370,7 @@ async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=user_data['base_message_id'],
-            text="🎭 **Stickerpacks**\n\n\nSelect a sticker collection:",
+            text="🎭 **Stickerpacks**\n\nSelect a sticker collection:",
             reply_markup=stickers_menu_keyboard(),
             parse_mode="Markdown"
         )
