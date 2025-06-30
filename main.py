@@ -139,12 +139,42 @@ STICKER_COLLECTIONS = {
     }
 }
 
+COLLECTIBLE_ITEMS = {
+    "Not Coin": {
+        "link": "https://t.me/notgames_bot/profile?startapp=786080766",
+        "description": (
+            "•Pizza #439 (Common) - 3.99 Ton   \n\n"
+            "•Dimond #542 (Common) - 3.99 Ton   \n\n"
+            "Can be used for crafting.  "
+        )
+    },
+    "Not Games": {
+        "link": "https://t.me/notgames_bot/profile?startapp=786080766",
+        "description": (
+            "•Sun #103 (Common) - 4.99 Ton   \n\n"
+            "Probably nothing, profile shade.  "
+        )
+    },
+    "Void": {
+        "link": "https://t.me/notgames_bot/profile?startapp=786080766",
+        "description": (
+            "•Psychodelic #300 (Epic) - 69.69 Ton   \n\n"
+            "•Beta #9962 (Common) - 4.99 Ton   \n\n"
+            "•First Flight #605 (Rare) - 4.99 Ton   \n\n\n"
+            "•MEME - 9.99 Ton   \n\n"
+            "•FOOD - 4.99 Ton   \n\n"            
+            "•BADGE - 2.99 Ton   \n\n"
+        )
+    }
+}
+
 CONTACT_USER = "jamside_ay_lol"
 
 def main_menu_keyboard():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("NFT", callback_data="nft_menu")],
-        [InlineKeyboardButton("Stickers", callback_data="stickers_menu")]
+        [InlineKeyboardButton("Stickers", callback_data="stickers_menu")],
+        [InlineKeyboardButton("Collectible Items", callback_data="collectible_menu")]
     ])
 
 def nft_menu_keyboard():
@@ -178,6 +208,25 @@ def sticker_detail_keyboard(sticker_name):
         ],
         [
             InlineKeyboardButton("⬅️ Back", callback_data="stickers_menu"),
+            InlineKeyboardButton("🏠 Home", callback_data="home")
+        ]
+    ])
+
+def collectible_menu_keyboard():
+    buttons = []
+    for item_name in COLLECTIBLE_ITEMS:
+        buttons.append([InlineKeyboardButton(item_name, callback_data=f"collectible_{item_name}")])
+    buttons.append([InlineKeyboardButton("⬅️ Back", callback_data="home")])
+    return InlineKeyboardMarkup(buttons)
+
+def collectible_detail_keyboard(item_name):
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("🔍 View Collectible Item", url=COLLECTIBLE_ITEMS[item_name]["link"]),
+            InlineKeyboardButton("💬 DM for Purchase", url=f"https://t.me/{CONTACT_USER}")
+        ],
+        [
+            InlineKeyboardButton("⬅️ Back", callback_data="collectible_menu"),
             InlineKeyboardButton("🏠 Home", callback_data="home")
         ]
     ])
@@ -376,6 +425,60 @@ async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE
             logger.error(f"Sticker details error: {e}")
             await show_main_menu(update, context, is_new=True)
 
+# Новые функции для раздела Collectible Items
+async def show_collectible_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Shows the collectible items menu"""
+    query = update.callback_query
+    await query.answer()
+    chat_id = query.message.chat_id
+    user_data = context.user_data
+    
+    await cleanup_temp_messages(context, chat_id)
+    
+    try:
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=user_data['base_message_id'],
+            text="🎁 **Collectible Items**\n\nSelect a category:",
+            reply_markup=collectible_menu_keyboard(),
+            parse_mode="Markdown"
+        )
+        logger.info(f"Collectible menu shown in message {user_data['base_message_id']}")
+    except BadRequest as e:
+        if "message is not modified" in str(e).lower():
+            logger.info("The collectible menu does not require changes")
+        else:
+            logger.error(f"Collectible menu error: {e}")
+            await show_main_menu(update, context, is_new=True)
+
+async def show_collectible_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, item_name: str) -> None:
+    """Shows collectible item details"""
+    query = update.callback_query
+    await query.answer()
+    chat_id = query.message.chat_id
+    user_data = context.user_data
+    
+    await cleanup_temp_messages(context, chat_id)
+    
+    item_data = COLLECTIBLE_ITEMS[item_name]
+    text = f"✨ **{item_name}** ✨\n\n{item_data['description']}\n"
+    
+    try:
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=user_data['base_message_id'],
+            text=text,
+            reply_markup=collectible_detail_keyboard(item_name),
+            parse_mode="Markdown"
+        )
+        logger.info(f"Showing collectible details in message {user_data['base_message_id']}")
+    except BadRequest as e:
+        if "message is not modified" in str(e).lower():
+            logger.info("The collectible details message does not require changes")
+        else:
+            logger.error(f"Collectible details error: {e}")
+            await show_main_menu(update, context, is_new=True)
+
 async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """NFT Back Button Handler"""
     query = update.callback_query
@@ -395,12 +498,17 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await show_nft_menu(update, context)
         elif data == "stickers_menu":
             await show_stickers_menu(update, context)
+        elif data == "collectible_menu":  # Новый обработчик
+            await show_collectible_menu(update, context)
         elif data.startswith("nft_"):
             nft_name = data[4:]
             await show_nft_detail(update, context, nft_name)
         elif data.startswith("sticker_"):
             sticker_name = data[8:]
             await show_sticker_detail(update, context, sticker_name)
+        elif data.startswith("collectible_"):  # Новый обработчик
+            item_name = data[12:]
+            await show_collectible_detail(update, context, item_name)
         elif data == "home":
             await show_main_menu(update, context)
         elif data == "back_nft":
