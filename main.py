@@ -145,14 +145,15 @@ COLLECTIBLE_ITEMS = {
         "description": (
             "•Pizza #439 (Common) - 3.99 Ton   \n\n"
             "•Dimond #542 (Common) - 3.99 Ton   \n\n"
-            "Can be used for crafting.  "
+            "1. Earn cards through your in-game activity or buy them on the marketplace.  \n"
+            "2. Turn your cards into profile shades, items, or even stickers.  "
         )
     },
     "Not Games": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
         "description": (
             "•Sun #103 (Common) - 4.99 Ton   \n\n"
-            "Probably nothing, profile shade.  "
+            "Not Games - It’s probably Steam for mobile games with (finally) updated interface.  "
         )
     },
     "Void": {
@@ -164,6 +165,9 @@ COLLECTIBLE_ITEMS = {
             "•MEME - 9.99 Ton   \n\n"
             "•FOOD - 4.99 Ton   \n\n"            
             "•BADGE - 2.99 Ton   \n\n"
+            "VOID: Compete. Dominate. Earn.  \n"
+            "Hardcore PvP action where the top players claim $NOT rewards every 3 weeks. Enter the Closed Beta. Prove yourself.  \n"
+            "Launch follows. No token. No hype. Just ruthless competition, evolving gameplay, and real-time rewards. Profiles, items, market coming. Enter or be forgotten."
         )
     }
 }
