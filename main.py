@@ -143,8 +143,8 @@ COLLECTIBLE_ITEMS = {
     "Not Coin": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
         "description": (
-            "•Pizza #439 (Common) - 3.99 Ton   \n\n"
-            "•Dimond #542 (Common) - 3.99 Ton   \n\n"
+            "•Pizza #439 (Common) - 3.99 Ton  \n\n"
+            "•Dimond #542 (Common) - 3.99 Ton  \n\n"
             "1. Earn cards through your in-game activity or buy them on the marketplace.  \n"
             "2. Turn your cards into profile shades, items, or even stickers.  "
         )
@@ -152,22 +152,22 @@ COLLECTIBLE_ITEMS = {
     "Not Games": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
         "description": (
-            "•Sun #103 (Common) - 4.99 Ton   \n\n"
+            "•Sun #103 (Common) - 4.99 Ton  \n\n"
             "Not Games - It’s probably Steam for mobile games with (finally) updated interface.  "
         )
     },
     "Void": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
         "description": (
-            "•Psychodelic #300 (Epic) - 69.69 Ton   \n\n"
-            "•Beta #9962 (Common) - 4.99 Ton   \n\n"
-            "•First Flight #605 (Rare) - 4.99 Ton   \n\n\n"
-            "•MEME - 9.99 Ton   \n\n"
-            "•FOOD - 4.99 Ton   \n\n"            
-            "•BADGE - 2.99 Ton   \n\n"
+            "•Psychodelic #300 (Epic) - 69.69 Ton  \n\n"
+            "•Beta #9962 (Common) - 4.99 Ton  \n\n"
+            "•First Flight #605 (Rare) - 4.99 Ton  \n\n"
+            "•MEME - 9.99 Ton  \n\n"
+            "•FOOD - 4.99 Ton  \n\n"            
+            "•BADGE - 2.99 Ton  \n\n"
             "VOID: Compete. Dominate. Earn.  \n"
             "Hardcore PvP action where the top players claim $NOT rewards every 3 weeks. Enter the Closed Beta. Prove yourself.  \n"
-            "Launch follows. No token. No hype. Just ruthless competition, evolving gameplay, and real-time rewards. Profiles, items, market coming. Enter or be forgotten."
+            "Launch follows. No token. No hype. Just ruthless competition, evolving gameplay, and real-time rewards. Profiles, items, market coming. Enter or be forgotten.  "
         )
     }
 }
@@ -226,7 +226,7 @@ def collectible_menu_keyboard():
 def collectible_detail_keyboard(item_name):
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("🔍 View Collectible Item", url=COLLECTIBLE_ITEMS[item_name]["link"]),
+            InlineKeyboardButton("🔍 View Item", url=COLLECTIBLE_ITEMS[item_name]["link"]),
             InlineKeyboardButton("💬 DM for Purchase", url=f"https://t.me/{CONTACT_USER}")
         ],
         [
