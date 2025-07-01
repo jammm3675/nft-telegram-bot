@@ -22,7 +22,7 @@ NFT_COLLECTIONS = {
     "Gems Winter Store": {
         "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",
         "description": (
-            "🎁 **Gift box** 🎁  \n"
+            "🎁 Gift box 🎁  \n"
             "by Gems Winter Store  \n\n"
             "Rarity: Rare  \n\n"
             "Own a piece of digital holiday magic! This rare gift box from Gems Winter Store \n"
@@ -32,7 +32,7 @@ NFT_COLLECTIONS = {
     "Lost Dogs: The Hint": {
         "image": "https://i.ibb.co/gZ20qd68/Lost-Dogs.png",
         "description": (
-            "*🦸 **The League - Ultimate Collector's Trophy** 🦸  \n"
+            "🦸 The League 🦸 - Ultimate Collector's Trophy  \n"
             "by Lost Dogs: The Hint  \n\n"
             "Rarity: Rare  \n\n"
             "Secure this legendary piece from the acclaimed Lost Dogs universe!  \n"
@@ -43,7 +43,7 @@ NFT_COLLECTIONS = {
     "Medieval Deck": {
         "image": "https://i.ibb.co/RTHnvCsr/TON-POKER.png",
         "description": (
-            "🃏 **Ace of Strength** 🃏  \n"
+            "🃏 Ace of Strength 🃏  \n"
             "by Medieval Deck\n\n"
             "Rarity: Epic\n\n"
             "This epic NFT was handcrafted by the visionary artist Ilya Stallone in collaboration with TON Poker.  "
@@ -52,7 +52,7 @@ NFT_COLLECTIONS = {
     "Postmarks: Odds + Ends": {
         "image": "https://i.ibb.co/1tvKy4HV/Fool-moon.png",
         "description": (
-            "🌙 **Fool Moon -  Classic Digital Art** 🌙  \n"
+            "🌙 Fool Moon 🌙 -  Classic Digital Art  \n"
             "by Postmarks: Odds + Ends\n\n"
             "**Story**: The fool moon, the worm-eaten luminary: a drunken sanctuary of the bewildered,  \n"
             "a lighthouse flickering from all sides. You get distracted, wandering like a sleeper –  \n"
@@ -63,7 +63,7 @@ NFT_COLLECTIONS = {
     "Postmarks: The Jaegers": {
         "image": "https://i.ibb.co/MyCJ8J33/NIX.png",
         "description": (
-            "🌊 **NIX - Deepwater Miracle** 🌊  \n"
+            "🌊 NIX 🌊- Deepwater Miracle  \n"
             "by Postmarks: The Jaegers\n\n"
             "Rarity: Rare\n\n"
             "**Story**: Once one of the Jaegers tried to fight one of the ancient titans "
@@ -74,7 +74,7 @@ NFT_COLLECTIONS = {
     "The Seven Virtues": {
         "image": "https://i.ibb.co/ympwRnF8/TheSevenVirtues.png",
         "description": (
-            "💫 **Patience Postmark - Symbol of Inner Strength** 💫  \n"
+            "💫 Patience Postmark 💫 - Symbol of Inner Strength  \n"
             "by The Seven Virtues  \n\n"
             "Rarity: Rare  \n\n"
             "The Seven Virtues is a collaboration between the artist Olyabolyaboo and Cheques Corp., continuing the narrative of -The Seven Deadly Sins-  \n"
@@ -86,7 +86,7 @@ NFT_COLLECTIONS = {
     "Ton Space Badges": {
         "image": "https://i.ibb.co/LDDnhfXy/TonSpaceBadges.png",
         "description": (
-            "🥇 **Gold Badge - Proof You Were EARLY** 🥇  \n"
+            "🥇 Gold Badge 🥇 - Proof You Were EARLY  \n"
             "by Ton Space Badges\n\n"
             "Own a piece of TON Space history! This exclusive badge is your verifiable proof  \n"
             "that you recognized the potential of TON Space before anyone else.  \n"
@@ -99,7 +99,7 @@ STICKER_COLLECTIONS = {
     "Dogs OG": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "🐶 **Elite Dog Collection - Status Symbols on the Loose!** 🐶\n\n"
+            "**Elite Dog Collection - Status Symbols on the Loose!** 🐶\n\n"
             "These aren't just stickers - they're membership cards to the most exclusive  \n"
             "Doge community on Telegram! Show off your status with these ultra-rare digital assets:  \n\n"
             "•Bow Tie #4780 - Absolutely Classic and Elegant  \n"
@@ -112,7 +112,7 @@ STICKER_COLLECTIONS = {
     "Dogs Rewards": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "⛏️ •Full Dig #4453 - The Ultimate Miner's Trophy** ⛏️\n\n" 
+            "•Full Dig #4453 - The Ultimate Miner's Trophy** ⛏️\n\n" 
             "This isn't just a sticker - it's proof of your dedication to the Doge ecosystem!  \n" 
             "Awarded only to the most committed community members and early supporters.  \n\n" 
             "🌟Why collectors value this above all:  \n" 
@@ -124,7 +124,7 @@ STICKER_COLLECTIONS = {
     "Lost Dogs": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "🔮 **•Magic of the Way #2871 - The Philosopher's Stone of Stickers** 🔮  \n\n"
+            "**•Magic of the Way #2871 - The Philosopher's Stone of Stickers** 🔮  \n\n"
             "Own the most mystical sticker in the Lost Dogs universe! This isn't just digital art - \n"
             "it's a key to hidden content and special privileges across the entire Lost Dogs ecosystem.  \n\n"
             "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun?  "
@@ -133,7 +133,7 @@ STICKER_COLLECTIONS = {
     "Not Coin": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "🪙 **•Not Meme #2015 - The Icon that started a revolution** 🪙  \n\n"
+            "**•Not Meme #2015 - The Icon that started a revolution** 🪙  \n\n"
             "Own a piece of crypto history! This legendary sticker launched a thousand memes  \n"
             "and became the symbol of the NotCoin phenomenon. More than digital art - it's a cultural artifact!  \n\n"
             "Probably nothing  "
@@ -142,7 +142,7 @@ STICKER_COLLECTIONS = {
     "Not Pixel": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "🎮 **Pixel Collection - Battle-tested, collector-approved** 🎮  \n\n"
+            "**Pixel Collection - Battle-tested, collector-approved** 🎮  \n\n"
             "Collect your own set of the most iconic pixel art from Telegram's biggest battle!  \n"
             "These aren't just stickers - these are trophies from the front lines of a social experiment that rocked crypto.  \n\n"
             "🌟 Best Flexible Set:  \n"
@@ -292,7 +292,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
     chat_id = update.effective_chat.id
     user_data = context.user_data
     text = (
-        "🌟 **Welcome to the Showcase!** 🌟\n\n"
+        "🗄️ **Welcome to the Showcase!** 🗄️\n\n"
         "Discover rare NFTs, unique stickers, and collectible items that are ready to become part of your collection. All transactions are secure via @GiftElfRobot.  \n\n"
         "🛍️ How to buy:  \n"
         "1️⃣ Browse our collections below.  \n"
@@ -461,7 +461,7 @@ async def show_collectible_menu(update: Update, context: ContextTypes.DEFAULT_TY
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=user_data['base_message_id'],
-            text="🎁 **Collectible Items**\n\nSelect a category:",
+            text="⚱️ **Collectible Items**\n\nSelect a category:",
             reply_markup=collectible_menu_keyboard(),
             parse_mode="Markdown"
         )
