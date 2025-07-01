@@ -159,7 +159,7 @@ COLLECTIBLE_ITEMS = {
     "Not Coin": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
         "description": (
-            "🍕 **Pizza #439 and Diamond #542 - NotCoin Chips** 💎\n\n"
+            "🍕 **Pizza #439 and Diamond #542 💎 - NotCoin Chips**  \n\n"
             "These aren't just collectibles - they're your resource to create something bigger.  \n"
             "Turn them into a corner of a profile, objects or even stickers.  "
 
@@ -168,7 +168,7 @@ COLLECTIBLE_ITEMS = {
     "Not Games": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
         "description": (
-            "☀️ **Sun #103 - the main source of energy** ☀️\n\n"
+            "☀️ **Sun #103 ☀️ - the main source of energy**  \n\n"
             "It's not just a collectible - it's your way of expressing yourself in the ecosystem, not in games.  \n"
             "Not Games - It’s probably Steam for mobile games with (finally) updated interface.  "
         )
@@ -176,10 +176,10 @@ COLLECTIBLE_ITEMS = {
     "Void": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
         "description": (
-            "🌀 **Void Collection - Digital Artifacts of Power** 🌀  \n\n"
+            "🌀 **Void Collection 🌀 - Digital Artifacts of Power**  \n\n"
             "Claim these legendary items before they disappear into the void! Each item unlocks  \n"
             "unique opportunities in the expanding Void universe.  \n\n"
-            "🌟Why collectors compete for them:  \n"
+            "Why collectors compete for them:  \n"
             "- Psychedelic #300: the rarest skin in the game, dedicated to the birthday of Not Coin  \n"
             "- Beta #9962: an indicator of the status of one of the first through a simple skin  \n"
             "- First Flight #605: one of the First Card  \n"
