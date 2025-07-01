@@ -22,48 +22,48 @@ NFT_COLLECTIONS = {
     "Gems Winter Store": {
         "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",
         "description": (
-            "**Gift box**\n"
-            "by Gems Winter Store\n\n"
-            "Rarity: Rare\n\n"
-            "Happy New Year! May 2025 bring you inspiration, good fortune, and countless joyful moments."
+            "🎁 **Gift box** 🎁  \n"
+            "by Gems Winter Store  \n\n"
+            "Rarity: Rare  \n\n"
+            "Own a piece of digital holiday magic! This rare gift box from Gems Winter Store \n"
+            "Each box contains surprises that collectors dream about - a true digital time capsule of festive joy!  "
         )
     },
     "Lost Dogs: The Hint": {
         "image": "https://i.ibb.co/gZ20qd68/Lost-Dogs.png",
         "description": (
-            "**The League**\n"
-            "by Lost Dogs: The Hint\n\n"
-            "Rarity: Rare\n\n"
-            "Sometimes you need to look at the bigger picture to understand the hint. "
-            "During times of great resistance, the generals insisted on Tin foil hats, "
-            "the leaders advocated for Evacuation, and individual dogs formed units to build a Dome. "
+            "*🦸 **The League - Ultimate Collector's Trophy** 🦸  \n"
+            "by Lost Dogs: The Hint  \n\n"
+            "Rarity: Rare  \n\n"
+            "Secure this legendary piece from the acclaimed Lost Dogs universe!  \n"
+            "This isn't just an NFT - it's a symbol of your status in the crypto-art world.  \n"
+            "Rare backstory with cult following. "
         )
     },
     "Medieval Deck": {
         "image": "https://i.ibb.co/RTHnvCsr/TON-POKER.png",
         "description": (
-            "**Ace of Strength**\n"
+            "🃏 **Ace of Strength** 🃏  \n"
             "by Medieval Deck\n\n"
             "Rarity: Epic\n\n"
-            "Ilya Stallone crafted this NFT together with TON Poker, the way a storyteller weaves a legend: "
-            "with irony, with mystery, with fire."
+            "This epic NFT was handcrafted by the visionary artist Ilya Stallone in collaboration with TON Poker.  "
         )
     },
     "Postmarks: Odds + Ends": {
         "image": "https://i.ibb.co/1tvKy4HV/Fool-moon.png",
         "description": (
-            "**Fool Moon**\n"
+            "🌙 **Fool Moon -  Classic Digital Art** 🌙  \n"
             "by Postmarks: Odds + Ends\n\n"
-            "The fool moon, the worm-eaten luminary: a drunken sanctuary of the bewildered, "
-            "a lighthouse flickering from all sides. You get distracted, wandering like a sleeper – "
-            "that's how the zodiacs died, my friend. Not overthrown by force, not defeated by intellect, "
-            "but lost in delirium."
+            "**Story**: The fool moon, the worm-eaten luminary: a drunken sanctuary of the bewildered,  \n"
+            "a lighthouse flickering from all sides. You get distracted, wandering like a sleeper –  \n"
+            "that's how the zodiacs died, my friend. Not overthrown by force, not defeated by intellect,  \n"
+            "but lost in delirium.  "
         )
     },
     "Postmarks: The Jaegers": {
         "image": "https://i.ibb.co/MyCJ8J33/NIX.png",
         "description": (
-            "**NIX**\n"
+            "🌊 **NIX - Deepwater Miracle** 🌊  \n"
             "by Postmarks: The Jaegers\n\n"
             "Rarity: Rare\n\n"
             "**Story**: Once one of the Jaegers tried to fight one of the ancient titans "
@@ -74,24 +74,23 @@ NFT_COLLECTIONS = {
     "The Seven Virtues": {
         "image": "https://i.ibb.co/ympwRnF8/TheSevenVirtues.png",
         "description": (
-            "**Patience Postmark**\n"
-            "by The Seven Virtues\n\n"
-            "Rarity: Rare\n\n"
-            "The Seven Virtues is a collaboration between the artist Olyabolyaboo and Cheques Corp., continuing the narrative of -The Seven Deadly Sins- "
-            "While the sins made us reflect on our weaknesses, this collection inspires action. Humility, generosity, "
-            "patience, purity, kindness, temperance, and diligence — seven principles that create a new story. "
-            "This drop is a symbol of the bright side of your inner strength. "
+            "💫 **Patience Postmark - Symbol of Inner Strength** 💫  \n"
+            "by The Seven Virtues  \n\n"
+            "Rarity: Rare  \n\n"
+            "The Seven Virtues is a collaboration between the artist Olyabolyaboo and Cheques Corp., continuing the narrative of -The Seven Deadly Sins-  \n"
+            "While the sins made us reflect on our weaknesses, this collection inspires action. Humility, generosity,  \n"
+            "patience, purity, kindness, temperance, and diligence — seven principles that create a new story.  \n"
+            "This drop is a symbol of the bright side of your inner strength.  "
         )
     },
     "Ton Space Badges": {
         "image": "https://i.ibb.co/LDDnhfXy/TonSpaceBadges.png",
         "description": (
-            "**Gold Badge**\n"
+            "🥇 **Gold Badge - Proof You Were EARLY** 🥇  \n"
             "by Ton Space Badges\n\n"
-            "TON Space Badges is an exclusive NFT collection by TON Space.  "
-            "Forged in the early orbit of the TON ecosystem, these badges were unlocked by users who fueled their journey with Stars. "
-            "Each badge is a limited collectible — a snapshot of early activity within TON Space. No remints. "
-            "No second drops. Just verifiable proof you were early. "
+            "Own a piece of TON Space history! This exclusive badge is your verifiable proof  \n"
+            "that you recognized the potential of TON Space before anyone else.  \n"
+            "No remints. No second drops. Just verifiable proof you were early.  "
         )
     }
 }
@@ -100,41 +99,58 @@ STICKER_COLLECTIONS = {
     "Dogs OG": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "•Bow Tie #4780 - from 6.99 Ton   \n\n"
-            "•One Piece #6673 - from 5.99 Ton   \n\n"
-            "•Panama #1417 - from 3.99 Ton   \n\n"
-            "•Kamikaze #4812 - from 2.99 Ton   \n\n"
-            "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)! "
+            "🐶 **Elite Dog Collection - Status Symbols on the Loose!** 🐶\n\n"
+            "These aren't just stickers - they're membership cards to the most exclusive  \n"
+            "Doge community on Telegram! Show off your status with these ultra-rare digital assets:  \n\n"
+            "•Bow Tie #4780 - Absolutely Classic and Elegant  \n"
+            "•One Piece #6673 - Iconic Character from the eponymous production  \n"
+            "•Panama Hat #1417 - Summer Classic  \n"
+            "•Kamikaze #4812 - Favorite Among Collectors of Original Items  \n\n"
+            "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)!  "
         )
     },
     "Dogs Rewards": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "•Full dig #4453 - from 9.99 Ton     \n\n"
+            "⛏️ •Full Dig #4453 - The Ultimate Miner's Trophy** ⛏️\n\n" 
+            "This isn't just a sticker - it's proof of your dedication to the Doge ecosystem!  \n" 
+            "Awarded only to the most committed community members and early supporters.  \n\n" 
+            "🌟Why collectors value this above all:  \n" 
+            "- Rare sticker in the Dogs universe  \n" 
+            "- Grants special mining bonuses  \n" 
+            "- Recognized status in all Doge games  " 
         )
     },
     "Lost Dogs": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "•Magic of the Way #2871 - from 9.99 Ton   \n\n"
-            "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun? "
+            "🔮 **•Magic of the Way #2871 - The Philosopher's Stone of Stickers** 🔮  \n\n"
+            "Own the most mystical sticker in the Lost Dogs universe! This isn't just digital art - \n"
+            "it's a key to hidden content and special privileges across the entire Lost Dogs ecosystem.  \n\n"
+            "Who are these Lost Dogs? They have an NFT collection, a game, a cartoon, and an entire universe… all for fun?  "
         )
     },
     "Not Coin": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "•Not Meme #2015 - from 299 Ton   \n\n"
-            "Probably nothing "
+            "🪙 **•Not Meme #2015 - The Icon that started a revolution** 🪙  \n\n"
+            "Own a piece of crypto history! This legendary sticker launched a thousand memes  \n"
+            "and became the symbol of the NotCoin phenomenon. More than digital art - it's a cultural artifact!  \n\n"
+            "Probably nothing  "
         )
     },
     "Not Pixel": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
         "description": (
-            "•Vice Pixel #1736 - from 9.99 Ton   \n\n"
-            "•Dogs Pixel #1023 - from 4.99 Ton   \n\n"
-            "•Grass Pixel #2536 - from 4.99 Ton   \n\n"
-            "•Mac Pixel #3071 - from 4.99 Ton   \n\n"
-            "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex "
+            "🎮 **Pixel Collection - Battle-tested, collector-approved** 🎮  \n\n"
+            "Collect your own set of the most iconic pixel art from Telegram's biggest battle!  \n"
+            "These aren't just stickers - these are trophies from the front lines of a social experiment that rocked crypto.  \n\n"
+            "🌟 Best Flexible Set:  \n"
+            "•Vice Pixel #1736: a nod to the legendary game  \n"
+            "•Dog Pixel #1023: a community favorite  \n"
+            "•Grass Pixel #2536: from the Minecraft universe  \n"
+            "•Mac Pixel #3071: everyone loves fast food, right?  \n\n"
+            "Biggest Telegram Battle, biggest social experiment, and now – biggest sticker flex  "
         )
     }
 }
@@ -143,31 +159,33 @@ COLLECTIBLE_ITEMS = {
     "Not Coin": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
         "description": (
-            "•Pizza #439 (Common) - 3.99 Ton  \n\n"
-            "•Dimond #542 (Common) - 3.99 Ton  \n\n"
-            "1. Earn cards through your in-game activity or buy them on the marketplace.  \n"
-            "2. Turn your cards into profile shades, items, or even stickers.  "
+            "🍕 **Pizza #439 and Diamond #542 - NotCoin Chips** 💎\n\n"
+            "These aren't just collectibles - they're your resource to create something bigger.  \n"
+            "Turn them into a corner of a profile, objects or even stickers.  "
+
         )
     },
     "Not Games": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
         "description": (
-            "•Sun #103 (Common) - 4.99 Ton  \n\n"
+            "☀️ **Sun #103 - the main source of energy** ☀️\n\n"
+            "It's not just a collectible - it's your way of expressing yourself in the ecosystem, not in games.  \n"
             "Not Games - It’s probably Steam for mobile games with (finally) updated interface.  "
         )
     },
     "Void": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
         "description": (
-            "•Psychodelic #300 (Epic) - 69.69 Ton  \n\n"
-            "•Beta #9962 (Common) - 4.99 Ton  \n\n"
-            "•First Flight #605 (Rare) - 4.99 Ton  \n\n"
-            "•MEME - 9.99 Ton  \n\n"
-            "•FOOD - 4.99 Ton  \n\n"            
-            "•BADGE - 2.99 Ton  \n\n"
-            "VOID: Compete. Dominate. Earn.  \n"
-            "Hardcore PvP action where the top players claim $NOT rewards every 3 weeks. Enter the Closed Beta. Prove yourself.  \n"
-            "Launch follows. No token. No hype. Just ruthless competition, evolving gameplay, and real-time rewards. Profiles, items, market coming. Enter or be forgotten.  "
+            "🌀 **Void Collection - Digital Artifacts of Power** 🌀  \n\n"
+            "Claim these legendary items before they disappear into the void! Each item unlocks  \n"
+            "unique opportunities in the expanding Void universe.  \n\n"
+            "🌟Why collectors compete for them:  \n"
+            "- Psychedelic #300: the rarest skin in the game, dedicated to the birthday of Not Coin  \n"
+            "- Beta #9962: an indicator of the status of one of the first through a simple skin  \n"
+            "- First Flight #605: one of the First Card  \n"
+            "- MEME/FOOD/BADGE: cases with exclusive skins  \n\n"
+            "These aren't just items - they're pieces of digital history.  \n"
+            "Complete your collection today!  "
         )
     }
 }
@@ -176,8 +194,9 @@ CONTACT_USER = "jamside_ay_lol"
 
 def main_menu_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("NFT", callback_data="nft_menu")],
-        [InlineKeyboardButton("Stickers", callback_data="stickers_menu")],
+        [
+            InlineKeyboardButton("NFT", callback_data="nft_menu")], InlineKeyboardButton("Stickers", callback_data="stickers_menu")
+        ],
         [InlineKeyboardButton("Collectible Items", callback_data="collectible_menu")]
     ])
 
@@ -275,10 +294,10 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
     user_data = context.user_data
     text = (
         "🌟 **Welcome to the Showcase!** 🌟\n\n"
-        "This bot will help you find NFTs that are ready to be sold to a new owner via secure transactions. \n\n"
-        "🔎 How to use: \n"
-        "1️⃣ Browse available NFT and Sticker offers in the bot. \n"
-        "2️⃣ All sales and trades are conducted securely via @GiftElfRobot to prevent fraud.  \n\n"
+        "Discover rare NFTs, unique stickers, and collectible items that are ready to become part of your collection. All transactions are secure via @GiftElfRobot.  \n\n"
+        "🛍️ How to buy:  \n"
+        "1️⃣ Browse our collections below.  \n"
+        "2️⃣ Found something you like? DM us for purchase or exchange!  \n\n"
         "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️"
     )
     
