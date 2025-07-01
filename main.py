@@ -194,9 +194,8 @@ CONTACT_USER = "jamside_ay_lol"
 
 def main_menu_keyboard():
     return InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("NFT", callback_data="nft_menu")], InlineKeyboardButton("Stickers", callback_data="stickers_menu")
-        ],
+        [InlineKeyboardButton("NFT", callback_data="nft_menu")], 
+        [InlineKeyboardButton("Stickers", callback_data="stickers_menu")],
         [InlineKeyboardButton("Collectible Items", callback_data="collectible_menu")]
     ])
 
