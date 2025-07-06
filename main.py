@@ -292,7 +292,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
     chat_id = update.effective_chat.id
     user_data = context.user_data
     text = (
-        "🗄️ **Welcome to the Showcase!** 🗄️\n\n"
+        "🏛 **Welcome to the Showcase!** 🏛\n\n"
         "Discover rare NFTs, unique stickers, and collectible items that are ready to become part of your collection. All transactions are secure via @GiftElfRobot.  \n\n"
         "🛍️ How to buy:  \n"
         "1️⃣ Browse our collections below.  \n"
