@@ -222,8 +222,8 @@ def main_menu_keyboard():
         [InlineKeyboardButton("NFT", callback_data="nft_menu")], 
         [InlineKeyboardButton("Stickers", callback_data="stickers_menu")],
         [InlineKeyboardButton("Collectible Items", callback_data="collectible_menu")],
-        [InlineKeyboardButton("🌟 Донат", callback_data="donate")],
-        [InlineKeyboardButton("🏆 Топ донатеров", callback_data="top_donors")]
+        [InlineKeyboardButton("🌟 Donat", callback_data="donate")],
+        [InlineKeyboardButton("🏆 Top Donators", callback_data="top_donors")]
     ])
 
 def nft_menu_keyboard():
@@ -561,7 +561,7 @@ async def start_donate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if not PAYMENT_PROVIDER_TOKEN:
         await context.bot.send_message(
             chat_id=chat_id,
-            text="⚠️ Донаты временно недоступны. Пожалуйста, попробуйте позже."
+            text="⚠️ Donations are temporarily unavailable. Please try again later."
         )
         return
 
@@ -586,7 +586,7 @@ async def start_donate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         logger.error(f"Error sending invoice: {e}")
         await context.bot.send_message(
             chat_id=chat_id,
-            text="⚠️ Произошла ошибка при создании доната. Пожалуйста, попробуйте позже."
+            text="⚠️ There was an error creating the donation. Please try again later."
         )
 
 async def pre_checkout_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -622,7 +622,7 @@ async def successful_payment(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     # Отправляем благодарность
     await update.message.reply_text(
-        f"❤️ Спасибо за ваш донат в {amount} звезд!",
+        f"❤️ Thank you for your donation of {amount} stars!",
         reply_markup=donation_thanks_keyboard()
     )
     logger.info(f"Successful donation: {amount} stars from {user.id}")
@@ -643,9 +643,9 @@ async def show_top_donors(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         reverse=True
     )[:10]  # Топ 10
     
-    text = "🏆 Топ донатеров:\n\n"
+    text = "🏆 Top Donators:\n\n"
     if not sorted_donors:
-        text += "Пока здесь пусто. Будьте первым!"
+        text += "It's empty here for now. Be the first!"
     else:
         for i, (user_id, data) in enumerate(sorted_donors, 1):
             username = data['username']
