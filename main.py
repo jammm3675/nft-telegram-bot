@@ -229,7 +229,7 @@ def top_donators_keyboard():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("🔄 Refresh", callback_data="top_donators")],
         [InlineKeyboardButton("⭐ Support Project", callback_data="donate_stars")],
-        [InlineKeyboardButton("⬅️ Back", callback_data="support_menu")]
+        [InlineKeyboardButton("⬅️ Back", callback_data="home")]  # Исправлено на home
     ])
 
 def format_top_donators():
@@ -272,8 +272,12 @@ async def show_support_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             reply_markup=support_menu_keyboard(),
             parse_mode="Markdown"
         )
-    except BadRequest:
-        await show_main_menu(update, context, is_new=True)
+    except BadRequest as e:
+        if "message is not modified" in str(e).lower():
+            pass  # Игнорируем если сообщение не изменилось
+        else:
+            # Создаем новое сообщение если старое недоступно
+            await show_main_menu(update, context, is_new=True)
 
 async def start_donate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Start donation process"""
@@ -290,7 +294,7 @@ async def start_donate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     try:
         message = await context.bot.send_message(
             chat_id=chat_id,
-            text="💫 Enter the number of Telegram Stars for donation:",
+            text="💫 Enter the number of Telegram Stars for donation (min 10):",
             reply_markup=donate_amount_keyboard()
         )
         user_data.setdefault('temp_messages', []).append(message.message_id)
@@ -330,24 +334,29 @@ async def process_donation_amount(update: Update, context: ContextTypes.DEFAULT_
     
     try:
         stars = int(message.text)
-        if stars < 1:
-            await message.reply_text("Minimum donation is 1 star ⭐")
+        if stars < 10:  # Минимум 10 звезд
+            await message.reply_text("Minimum donation is 10 stars ⭐")
             return
         
         # Create payment
         prices = [LabeledPrice(label=f"{stars} Telegram Stars", amount=stars * 100)]
         
-        # Send invoice (без PROVIDER_TOKEN для Telegram Stars)
-        await context.bot.send_invoice(
-            chat_id=chat_id,
-            title=f"Donation {stars}⭐",
-            description="Thank you for supporting our project!",
-            currency=CURRENCY,
-            prices=prices,
-            payload=f"donation_{message.from_user.id}",
-            max_tip_amount=100000,
-            suggested_tip_amounts=[100, 500, 1000, 5000]
-        )
+        # Send invoice
+        try:
+            await context.bot.send_invoice(
+                chat_id=chat_id,
+                title=f"Donation {stars}⭐",
+                description="Thank you for supporting our project!",
+                currency=CURRENCY,
+                prices=prices,
+                payload=f"donation_{message.from_user.id}",
+                max_tip_amount=100000,
+                suggested_tip_amounts=[100, 500, 1000, 5000]
+            )
+        except Exception as e:
+            logger.error(f"Error sending invoice: {e}")
+            await message.reply_text("❌ Failed to create donation. Please try again later.")
+            return
         
         # Reset state
         user_data['awaiting_donation'] = False
@@ -380,10 +389,13 @@ async def successful_payment_handler(update: Update, context: ContextTypes.DEFAU
         donators[user.id]['total'] += stars
     
     # Format response
+    sorted_donators = sorted(donators.items(), key=lambda x: x[1]['total'], reverse=True)
+    rank = next((i+1 for i, (uid, _) in enumerate(sorted_donators) if uid == user.id), 0)
+    
     text = (
         f"🎉 {user.full_name}, thank you for donating {stars}⭐!\n\n"
         "Your support means a lot to us!\n\n"
-        f"Your rank in top donators: #{sorted(donators.items(), key=lambda x: x[1]['total'], reverse=True).index((user.id, donators[user.id])) + 1}🏅"
+        f"Your rank in top donators: #{rank}🏅"
     )
     
     await message.reply_text(text)
@@ -410,7 +422,7 @@ def nft_menu_keyboard():
 def nft_detail_keyboard(nft_name):
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("⬅️ Back", callback_data="back_nft"),
+            InlineKeyboardButton("⬅️ Back", callback_data="nft_menu"),
             InlineKeyboardButton("💬 DM for exchange", url=f"https://t.me/{CONTACT_USER}")
         ],
         [InlineKeyboardButton("🏠 Home", callback_data="home")]
@@ -704,19 +716,15 @@ async def show_collectible_detail(update: Update, context: ContextTypes.DEFAULT_
             logger.error(f"Collectible details error: {e}")
             await show_main_menu(update, context, is_new=True)
 
-async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle NFT back button"""
-    query = update.callback_query
-    await query.answer()
-    
-    await cleanup_temp_messages(context, query.message.chat_id)
-    
-    await show_nft_menu(update, context)
-
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle all callback buttons"""
     query = update.callback_query
     data = query.data
+    user_data = context.user_data
+
+    # Сбрасываем состояние доната при любом действии, кроме начала доната
+    if data != "donate_stars":
+        user_data['awaiting_donation'] = False
 
     try:
         if data == "nft_menu":
@@ -742,8 +750,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await show_collectible_detail(update, context, item_name)
         elif data == "home":
             await show_main_menu(update, context)
-        elif data == "back_nft":
-            await handle_back_nft(update, context)
     except Exception as e:
         logger.error(f"Button handler error: {e}")
         try:
