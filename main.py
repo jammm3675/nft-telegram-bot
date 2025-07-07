@@ -30,7 +30,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN', '8010736258:AAF6_xDBDbWCGSACBLv8GI9o6WFWT21ZlBA')
-PROVIDER_TOKEN = os.environ.get('PROVIDER_TOKEN', 'YOUR_PAYMENT_PROVIDER_TOKEN')
 CURRENCY = 'XTR'  # Telegram Stars
 
 # In-memory storage for donations
@@ -338,12 +337,11 @@ async def process_donation_amount(update: Update, context: ContextTypes.DEFAULT_
         # Create payment
         prices = [LabeledPrice(label=f"{stars} Telegram Stars", amount=stars * 100)]
         
-        # Send invoice
+        # Send invoice (без PROVIDER_TOKEN для Telegram Stars)
         await context.bot.send_invoice(
             chat_id=chat_id,
             title=f"Donation {stars}⭐",
             description="Thank you for supporting our project!",
-            provider_token=PROVIDER_TOKEN,
             currency=CURRENCY,
             prices=prices,
             payload=f"donation_{message.from_user.id}",
