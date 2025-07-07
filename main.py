@@ -25,7 +25,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN', '8010736258:AAF6_xDBDbWCGSACBLv8GI9o6WFWT21ZlBA')
-PAYMENT_PROVIDER_TOKEN = os.environ.get('PAYMENT_PROVIDER_TOKEN', '')
+PAYMENT_PROVIDER_TOKEN = os.environ.get('PAYMENT_PROVIDER_TOKEN', '284685063:TEST:YjZiZTk5ZTFmM2Iy')
 
 # Загрузка данных о донатах
 def load_donations():
