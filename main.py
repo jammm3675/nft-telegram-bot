@@ -6,14 +6,7 @@ import time
 import requests
 import json
 from flask import Flask
-from telegram import (
-    Update, 
-    InlineKeyboardButton, 
-    InlineKeyboardMarkup, 
-    LabeledPrice, 
-    PreCheckoutQuery,
-    BotCommand
-)
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, LabeledPrice, PreCheckoutQuery
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -25,7 +18,6 @@ from telegram.ext import (
 )
 from telegram.error import TelegramError, BadRequest, Conflict
 
-# Configure logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -34,9 +26,8 @@ logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN', '8010736258:AAF6_xDBDbWCGSACBLv8GI9o6WFWT21ZlBA')
 PAYMENT_PROVIDER_TOKEN = os.environ.get('PAYMENT_PROVIDER_TOKEN', '284685063:TEST:YjZiZTk5ZTFmM2Iy')
-ADMIN_USER_ID = int(os.environ.get('ADMIN_USER_ID', 786080766))  # Your Telegram user ID
 
-# Load donation data
+# Загрузка данных о донатах
 def load_donations():
     try:
         with open('donations.json', 'r') as f:
@@ -44,29 +35,14 @@ def load_donations():
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
 
-# Save donation data
+# Сохранение данных о донатах
 def save_donations(donations):
     with open('donations.json', 'w') as f:
         json.dump(donations, f, indent=4)
 
-# Load refund data
-def load_refunds():
-    try:
-        with open('refunds.json', 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
-
-# Save refund data
-def save_refunds(refunds):
-    with open('refunds.json', 'w') as f:
-        json.dump(refunds, f, indent=4)
-
-# Initialize data
+# Инициализация данных
 donations_data = load_donations()
-refunds_data = load_refunds()
 
-# NFT Collections
 NFT_COLLECTIONS = {
     "Gems Winter Store": {
         "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",
@@ -144,7 +120,6 @@ NFT_COLLECTIONS = {
     }
 }
 
-# Sticker Collections
 STICKER_COLLECTIONS = {
     "Dogs OG": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
@@ -156,7 +131,7 @@ STICKER_COLLECTIONS = {
             "•One Piece #6673 - Iconic Character from the eponymous production  \n"
             "•Panama Hat #1417 - Summer Classic  \n"
             "•Kamikaze #4812 - Favorite Among Collectors of Original Items  \n\n"
-            "Meet Dogs and get ready to meet your new best friend who's always got your back (and your snacks)!  "
+            "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)!  "
         )
     },
     "Dogs Rewards": {
@@ -205,7 +180,6 @@ STICKER_COLLECTIONS = {
     }
 }
 
-# Collectible Items
 COLLECTIBLE_ITEMS = {
     "Not Coin": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
@@ -221,7 +195,7 @@ COLLECTIBLE_ITEMS = {
         "description": (
             "☀️ **Sun #103 ☀️ - the main source of energy**  \n\n"
             "It's not just a collectible - it's your way of expressing yourself in the ecosystem, not in games.  \n"
-            "Not Games - It's probably Steam for mobile games with (finally) updated interface.  "
+            "Not Games - It’s probably Steam for mobile games with (finally) updated interface.  "
         )
     },
     "Void": {
@@ -241,16 +215,15 @@ COLLECTIBLE_ITEMS = {
     }
 }
 
-CONTACT_USER = "jamside_ay_lol"
+CONTACT_USER = "not_jammm"
 
-# Menu Keyboards
 def main_menu_keyboard():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("NFT", callback_data="nft_menu")], 
         [InlineKeyboardButton("Stickers", callback_data="stickers_menu")],
         [InlineKeyboardButton("Collectible Items", callback_data="collectible_menu")],
-        [InlineKeyboardButton("🌟 Donate", callback_data="donate")],
-        [InlineKeyboardButton("🏆 Top Donors", callback_data="top_donors")]
+        [InlineKeyboardButton("🌟 Donat", callback_data="donate")],
+        [InlineKeyboardButton("🏆 Top Donators", callback_data="top_donors")]
     ])
 
 def nft_menu_keyboard():
@@ -309,24 +282,14 @@ def collectible_detail_keyboard(item_name):
 
 def donation_thanks_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🏠 Main Menu", callback_data="home")]
+        [InlineKeyboardButton("🏠 Главное меню", callback_data="home")]
     ])
 
 def top_donors_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("⬅️ Back", callback_data="home")]
+        [InlineKeyboardButton("⬅️ Назад", callback_data="home")]
     ])
 
-# Bot Commands
-async def set_commands(application: Application):
-    commands = [
-        BotCommand("start", "Start the bot"),
-        BotCommand("donate", "Support the developer"),
-        BotCommand("refund", "Refund a donation (admin)"),
-    ]
-    await application.bot.set_my_commands(commands)
-
-# Start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Command handler /start"""
     user_data = context.user_data
@@ -345,7 +308,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     await show_main_menu(update, context, is_new=True)
 
-# Cleanup temporary messages
 async def cleanup_temp_messages(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
     """Deletes all temporary messages and clears the list"""
     user_data = context.user_data
@@ -362,19 +324,17 @@ async def cleanup_temp_messages(context: ContextTypes.DEFAULT_TYPE, chat_id: int
     
     user_data['temp_messages'] = []
 
-# Show main menu
 async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_new=False) -> None:
     """Shows the main menu"""
     chat_id = update.effective_chat.id
     user_data = context.user_data
     text = (
-        "🏛 **Welcome to the Digital Collectibles Showcase!** 🏛\n\n"
-        "Discover rare NFTs, unique stickers, and exclusive collectible items ready to join your collection. "
-        "All transactions are securely processed via Telegram Stars.\n\n"
-        "🛍️ How to acquire items:\n"
-        "1️⃣ Browse our collections below\n"
-        "2️⃣ Found something you like? DM us for purchase or exchange options!\n\n"
-        "⚠️ NFTs from this profile will be available for sale ONLY after 01.10.25 ⚠️"
+        "🏛 **Welcome to the Showcase!** 🏛\n\n"
+        "Discover rare NFTs, unique stickers, and collectible items that are ready to become part of your collection. All transactions are secure via @GiftElfRobot.  \n\n"
+        "🛍️ How to buy:  \n"
+        "1️⃣ Browse our collections below.  \n"
+        "2️⃣ Found something you like? DM us for purchase or exchange!  \n\n"
+        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️"
     )
     
     await cleanup_temp_messages(context, chat_id)
@@ -400,7 +360,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
             logger.info(f"Main message updated: {user_data['base_message_id']}")
         except BadRequest as e:
             if "message is not modified" in str(e).lower():
-                logger.info("Main menu unchanged")
+                logger.info("The message does not require changes (main menu)")
             else:
                 logger.error(f"Main menu error: {e}")
                 message = await context.bot.send_message(
@@ -412,7 +372,6 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
                 user_data['base_message_id'] = message.message_id
                 logger.info(f"New main message created due to error: {message.message_id}")
 
-# NFT Menu
 async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Shows the NFT menu"""
     query = update.callback_query
@@ -426,19 +385,18 @@ async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=user_data['base_message_id'],
-            text="🎨 **NFT Collections**\n\nSelect an NFT to view details:",
+            text="🎨 **NFT Collections**\n\nSelect an NFT to view:",
             reply_markup=nft_menu_keyboard(),
             parse_mode="Markdown"
         )
         logger.info(f"NFT menu shown in message {user_data['base_message_id']}")
     except BadRequest as e:
         if "message is not modified" in str(e).lower():
-            logger.info("NFT menu unchanged")
+            logger.info("The NFT message does not require modifications")
         else:
             logger.error(f"NFT menu error: {e}")
             await show_main_menu(update, context, is_new=True)
 
-# NFT Details
 async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nft_name: str) -> None:
     """Shows NFT details"""
     query = update.callback_query
@@ -454,7 +412,7 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
         message = await context.bot.send_photo(
             chat_id=chat_id,
             photo=nft['image'],
-            caption=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Available for sale/exchange",
+            caption=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange",
             reply_markup=nft_detail_keyboard(nft_name),
             parse_mode="Markdown"
         )
@@ -463,17 +421,16 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
         logger.info(f"Temporary NFT message created: {message.message_id}")
         
     except Exception as e:
-        logger.error(f"NFT detail error: {e}")
+        logger.error(f"Ошибка деталей NFT: {e}")
         message = await context.bot.send_message(
             chat_id=chat_id,
-            text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Available for sale/exchange\n\n⚠️ Image temporarily unavailable",
+            text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Image is temporarily unavailable",
             reply_markup=nft_detail_keyboard(nft_name),
             parse_mode="Markdown"
         )
         user_data.setdefault('temp_messages', []).append(message.message_id)
         logger.info(f"NFT text temporary message created: {message.message_id}")
 
-# Stickers Menu
 async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Shows the sticker menu"""
     query = update.callback_query
@@ -487,19 +444,18 @@ async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=user_data['base_message_id'],
-            text="🎭 **Sticker Collections**\n\nSelect a sticker pack to view:",
+            text="🎭 **Stickerpacks**\n\nSelect a sticker collection:",
             reply_markup=stickers_menu_keyboard(),
             parse_mode="Markdown"
         )
-        logger.info(f"Sticker menu shown in message {user_data['base_message_id']}")
+        logger.info(f"Showing sticker menu in message {user_data['base_message_id']}")
     except BadRequest as e:
         if "message is not modified" in str(e).lower():
-            logger.info("Sticker menu unchanged")
+            logger.info("The sticker message does not require any changes.")
         else:
             logger.error(f"Sticker menu error: {e}")
             await show_main_menu(update, context, is_new=True)
 
-# Sticker Details
 async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, sticker_name: str) -> None:
     """Shows sticker pack details"""
     query = update.callback_query
@@ -520,15 +476,14 @@ async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE
             reply_markup=sticker_detail_keyboard(sticker_name),
             parse_mode="Markdown"
         )
-        logger.info(f"Sticker details shown in message {user_data['base_message_id']}")
+        logger.info(f"Showing sticker details in message {user_data['base_message_id']}")
     except BadRequest as e:
         if "message is not modified" in str(e).lower():
-            logger.info("Sticker details unchanged")
+            logger.info("The sticker details message does not require any changes")
         else:
             logger.error(f"Sticker details error: {e}")
             await show_main_menu(update, context, is_new=True)
 
-# Collectibles Menu
 async def show_collectible_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Shows the collectible items menu"""
     query = update.callback_query
@@ -542,19 +497,18 @@ async def show_collectible_menu(update: Update, context: ContextTypes.DEFAULT_TY
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=user_data['base_message_id'],
-            text="⚱️ **Collectible Items**\n\nSelect a category to view:",
+            text="⚱️ **Collectible Items**\n\nSelect a category:",
             reply_markup=collectible_menu_keyboard(),
             parse_mode="Markdown"
         )
         logger.info(f"Collectible menu shown in message {user_data['base_message_id']}")
     except BadRequest as e:
         if "message is not modified" in str(e).lower():
-            logger.info("Collectible menu unchanged")
+            logger.info("The collectible menu does not require changes")
         else:
             logger.error(f"Collectible menu error: {e}")
             await show_main_menu(update, context, is_new=True)
 
-# Collectible Details
 async def show_collectible_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, item_name: str) -> None:
     """Shows collectible item details"""
     query = update.callback_query
@@ -575,15 +529,14 @@ async def show_collectible_detail(update: Update, context: ContextTypes.DEFAULT_
             reply_markup=collectible_detail_keyboard(item_name),
             parse_mode="Markdown"
         )
-        logger.info(f"Collectible details shown in message {user_data['base_message_id']}")
+        logger.info(f"Showing collectible details in message {user_data['base_message_id']}")
     except BadRequest as e:
         if "message is not modified" in str(e).lower():
-            logger.info("Collectible details unchanged")
+            logger.info("The collectible details message does not require changes")
         else:
             logger.error(f"Collectible details error: {e}")
             await show_main_menu(update, context, is_new=True)
 
-# Back to NFT Menu
 async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """NFT Back Button Handler"""
     query = update.callback_query
@@ -593,9 +546,8 @@ async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     
     await show_nft_menu(update, context)
 
-# Start Donation
 async def start_donate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send donation invoice"""
+    """Отправляет инвойс для доната"""
     query = update.callback_query
     if query:
         await query.answer()
@@ -617,12 +569,12 @@ async def start_donate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         payload = f"donate_{update.effective_user.id}_{int(time.time())}"
         await context.bot.send_invoice(
             chat_id=chat_id,
-            title="Support the Developer",
-            description="Your donation helps improve this bot!",
+            title="Поддержать разработчика",
+            description="Ваш донат помогает развитию бота!",
             payload=payload,
             provider_token=PAYMENT_PROVIDER_TOKEN,
             currency="XTR",
-            prices=[LabeledPrice(label="Telegram Stars", amount=1)],
+            prices=[LabeledPrice(label="Звёзды", amount=1)],
             need_name=False,
             need_phone_number=False,
             need_email=False,
@@ -634,12 +586,11 @@ async def start_donate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         logger.error(f"Error sending invoice: {e}")
         await context.bot.send_message(
             chat_id=chat_id,
-            text="⚠️ An error occurred while creating the donation. Please try again later."
+            text="⚠️ There was an error creating the donation. Please try again later."
         )
 
-# Pre-checkout Handler
 async def pre_checkout_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles pre-checkout payment query"""
+    """Обрабатывает предварительный запрос платежа"""
     query = update.pre_checkout_query
     try:
         await query.answer(ok=True)
@@ -647,51 +598,37 @@ async def pre_checkout_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     except Exception as e:
         logger.error(f"Pre-checkout error: {e}")
 
-# Successful Payment
 async def successful_payment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles successful payment"""
+    """Обрабатывает успешный платеж"""
     user = update.effective_user
     payment = update.message.successful_payment
-    amount = payment.total_amount  # Amount in stars
+    amount = payment.total_amount  # сумма в звездах
     
     global donations_data
     
-    # Update donation data
+    # Обновляем данные о донатах
     user_id = str(user.id)
-    transaction_id = payment.telegram_payment_charge_id
-    
     if user_id in donations_data:
         donations_data[user_id]['total'] += amount
         donations_data[user_id]['count'] += 1
-        donations_data[user_id]['transactions'].append({
-            "id": transaction_id,
-            "amount": amount,
-            "timestamp": int(time.time())
-        })
     else:
         donations_data[user_id] = {
             'username': user.username or user.full_name,
             'total': amount,
-            'count': 1,
-            'transactions': [{
-                "id": transaction_id,
-                "amount": amount,
-                "timestamp": int(time.time())
-            }]
+            'count': 1
         }
     
     save_donations(donations_data)
     
-    # Send thank you message
+    # Отправляем благодарность
     await update.message.reply_text(
         f"❤️ Thank you for your donation of {amount} stars!",
         reply_markup=donation_thanks_keyboard()
     )
     logger.info(f"Successful donation: {amount} stars from {user.id}")
 
-# Show Top Donors
 async def show_top_donors(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Shows top donors leaderboard"""
+    """Показывает топ донатеров"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat_id
@@ -699,26 +636,21 @@ async def show_top_donors(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     
     await cleanup_temp_messages(context, chat_id)
     
-    # Reload data to get latest donations
-    global donations_data
-    donations_data = load_donations()
-    
-    # Sort donors by total amount
+    # Сортируем донатеров по сумме
     sorted_donors = sorted(
         donations_data.items(),
         key=lambda x: x[1]['total'],
         reverse=True
-    )[:10]  # Top 10
+    )[:10]  # Топ 10
     
-    text = "🏆 **Top Donors** 🏆\n\n"
+    text = "🏆 Top Donators:\n\n"
     if not sorted_donors:
-        text += "No donations yet. Be the first to donate!"
+        text += "It's empty here for now. Be the first!"
     else:
         for i, (user_id, data) in enumerate(sorted_donors, 1):
             username = data['username']
             total = data['total']
-            count = data['count']
-            text += f"{i}. {username}: {total} stars ({count} donations)\n"
+            text += f"{i}. {username}: {total} звезд\n"
     
     try:
         await context.bot.edit_message_text(
@@ -728,59 +660,12 @@ async def show_top_donors(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             reply_markup=top_donors_keyboard(),
             parse_mode="Markdown"
         )
-        logger.info(f"Top donors shown in message {user_data['base_message_id']}")
     except BadRequest as e:
         logger.error(f"Top donors error: {e}")
         await show_main_menu(update, context, is_new=True)
 
-# Refund Command
-async def refund(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Refund a donation (admin only)"""
-    if update.effective_user.id != ADMIN_USER_ID:
-        await update.message.reply_text("❌ You are not authorized to use this command.")
-        return
-        
-    if not context.args or len(context.args) < 1:
-        await update.message.reply_text("Usage: /refund <payment_charge_id>")
-        return
-        
-    payment_charge_id = context.args[0]
-    
-    try:
-        # Attempt to refund the payment
-        await context.bot.refund_star_payment(payment_charge_id)
-        
-        # Update refunds data
-        global refunds_data
-        refunds_data[payment_charge_id] = {
-            "timestamp": int(time.time()),
-            "admin": update.effective_user.id
-        }
-        save_refunds(refunds_data)
-        
-        # Update donations data
-        global donations_data
-        for user_id, data in donations_data.items():
-            for transaction in data['transactions']:
-                if transaction['id'] == payment_charge_id:
-                    data['total'] -= transaction['amount']
-                    data['count'] -= 1
-                    # Remove the transaction
-                    data['transactions'] = [t for t in data['transactions'] if t['id'] != payment_charge_id]
-                    break
-        
-        save_donations(donations_data)
-        
-        await update.message.reply_text(f"✅ Refund for payment {payment_charge_id} processed successfully.")
-        logger.info(f"Refund processed: {payment_charge_id} by {update.effective_user.id}")
-        
-    except Exception as e:
-        await update.message.reply_text(f"❌ Refund failed: {str(e)}")
-        logger.error(f"Refund error: {e}")
-
-# Button Handler
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles all callback buttons"""
+    """Обработчик всех callback-кнопок"""
     query = update.callback_query
     data = query.data
 
@@ -805,19 +690,16 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             item_name = data[12:]
             await show_collectible_detail(update, context, item_name)
         elif data == "home":
-            # Clear all temporary messages and show main menu
-            await cleanup_temp_messages(context, query.message.chat_id)
-            await show_main_menu(update, context, is_new=True)
+            await show_main_menu(update, context)
         elif data == "back_nft":
             await handle_back_nft(update, context)
     except Exception as e:
-        logger.error(f"Button handler error: {e}")
+        logger.error(f"Error in button handler: {e}")
         try:
             await query.answer("⚠️ An error occurred, please try again later")
         except:
             pass
 
-# Flask Server for Keep-Alive
 def run_flask_server():
     app = Flask(__name__)
 
@@ -832,40 +714,33 @@ def run_flask_server():
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
 
-# Keep-Alive Function
 def keep_alive():
-    """Regularly sends requests to keep the bot alive"""
+    """Regularly sends requests to the server so that the bot does not disconnect"""
     while True:
         try:
             server_url = os.environ.get('RENDER_EXTERNAL_URL', 'http://localhost:10000')
             health_url = f"{server_url}/health"
             
             response = requests.get(health_url, timeout=10)
-            logger.info(f"Keep-alive request sent! Status: {response.status_code}")
+            logger.info(f"Wake up request sent! Status: {response.status_code}")
         except Exception as e:
-            logger.error(f"Keep-alive error: {e}")
+            logger.error(f"Error while waking up: {e}")
         
-        time.sleep(14 * 60)  # Sleep for 14 minutes
+        time.sleep(14 * 60)
 
-# Main Function
 def main() -> None:
     if not BOT_TOKEN:
-        logger.error("❌ BOT_TOKEN environment variable not set!")
+        logger.error("❌ BOT_TOKEN not installed!")
         return
         
     if not PAYMENT_PROVIDER_TOKEN:
         logger.warning("⚠️ PAYMENT_PROVIDER_TOKEN not set. Donations will be disabled")
-    
-    if not ADMIN_USER_ID:
-        logger.warning("⚠️ ADMIN_USER_ID not set. Refund command will be disabled")
 
-    # Start Flask server in a thread
     server_thread = threading.Thread(target=run_flask_server)
     server_thread.daemon = True
     server_thread.start()
     logger.info(f"🌐 HTTP server running on port {os.environ.get('PORT', 10000)}")
 
-    # Start keep-alive thread for Render
     if os.environ.get('RENDER'):
         wakeup_thread = threading.Thread(target=keep_alive)
         wakeup_thread.daemon = True
@@ -874,26 +749,18 @@ def main() -> None:
     else:
         logger.info("🖥️ Local Launch - Keep Alive feature disabled")
 
-    # Create application
     application = Application.builder().token(BOT_TOKEN).build()
-    
-    # Set bot commands
-    application.post_init.set_commands = set_commands
-    
-    # Add handlers
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("donate", start_donate))
-    application.add_handler(CommandHandler("refund", refund))
     application.add_handler(CallbackQueryHandler(button_handler))
     application.add_handler(PreCheckoutQueryHandler(pre_checkout_handler))
     application.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment))
 
-    logger.info("🤖 Bot is starting...")
+    logger.info("🤖 Bot started! Waiting for messages...")
     
     max_retries = 5
     retry_delay = 10
     
-    # Run with retries
     for attempt in range(max_retries):
         try:
             application.run_polling(
