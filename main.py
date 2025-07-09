@@ -42,6 +42,7 @@ def save_donations(donations):
 
 donations_data = load_donations()
 
+# NFT коллекции
 NFT_COLLECTIONS = {
     "Gems Winter Store": {
         "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",
@@ -119,6 +120,7 @@ NFT_COLLECTIONS = {
     }
 }
 
+# Коллекции стикеров
 STICKER_COLLECTIONS = {
     "Dogs OG": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
@@ -179,6 +181,7 @@ STICKER_COLLECTIONS = {
     }
 }
 
+# Коллекционные предметы
 COLLECTIBLE_ITEMS = {
     "Not Coin": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
@@ -695,25 +698,9 @@ async def refund(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     transaction_id = context.args[0]
     
-    # Поиск транзакции в данных
-    found = False
-    target_user_id = None
-    amount = 0
-    for uid, data in donations_data.items():
-        if 'transactions' in data and transaction_id in data['transactions']:
-            found = True
-            target_user_id = uid
-            amount = data['transactions'][transaction_id]
-            break
-    
-    if not found:
-        await update.message.reply_text(f"❌ Transaction {transaction_id} not found.")
-        return
-
     # Выполняем возврат через API Telegram
     url = f"https://api.telegram.org/bot{context.bot.token}/refundStarPayment"
     payload = {
-        "user_id": int(target_user_id),
         "telegram_payment_charge_id": transaction_id
     }
     
@@ -722,17 +709,20 @@ async def refund(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             async with session.post(url, json=payload) as response:
                 result = await response.json()
                 if result.get('ok'):
-                    # Обновляем данные
-                    user_data = donations_data[target_user_id]
-                    user_data['total'] -= amount
-                    user_data['count'] -= 1
-                    del user_data['transactions'][transaction_id]
-                    
-                    # Если больше нет транзакций, удаляем пользователя?
-                    if user_data['count'] == 0:
-                        del donations_data[target_user_id]
-                    
-                    save_donations(donations_data)
+                    # Обновляем данные о донатах
+                    for user_id, data in donations_data.items():
+                        if 'transactions' in data and transaction_id in data['transactions']:
+                            amount = data['transactions'][transaction_id]
+                            data['total'] -= amount
+                            data['count'] -= 1
+                            del data['transactions'][transaction_id]
+                            
+                            # Если больше нет транзакций, удаляем пользователя?
+                            if data['count'] == 0:
+                                del donations_data[user_id]
+                            
+                            save_donations(donations_data)
+                            break
                     
                     await update.message.reply_text(f"✅ Refund for transaction {transaction_id} was successful!")
                 else:
