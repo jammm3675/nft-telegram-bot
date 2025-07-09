@@ -5,6 +5,7 @@ import asyncio
 import time
 import requests
 import json
+import aiohttp
 from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, LabeledPrice, PreCheckoutQuery
 from telegram.ext import (
@@ -41,7 +42,6 @@ def save_donations(donations):
 
 donations_data = load_donations()
 
-# NFT коллекции
 NFT_COLLECTIONS = {
     "Gems Winter Store": {
         "image": "https://i.ibb.co/JWsYQJwH/CARTONKI.png",
@@ -119,7 +119,6 @@ NFT_COLLECTIONS = {
     }
 }
 
-# Коллекции стикеров
 STICKER_COLLECTIONS = {
     "Dogs OG": {
         "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
@@ -180,7 +179,6 @@ STICKER_COLLECTIONS = {
     }
 }
 
-# Коллекционные предметы
 COLLECTIBLE_ITEMS = {
     "Not Coin": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
@@ -602,20 +600,24 @@ async def successful_payment(update: Update, context: ContextTypes.DEFAULT_TYPE)
     """Обрабатывает успешный платеж"""
     user = update.effective_user
     payment = update.message.successful_payment
-    amount = payment.total_amount  # сумма в звездах
-    
+    amount = payment.total_amount
+    transaction_id = payment.telegram_payment_charge_id
+
     global donations_data
-    
-    # Обновляем данные о донатах
     user_id = str(user.id)
+
     if user_id in donations_data:
         donations_data[user_id]['total'] += amount
         donations_data[user_id]['count'] += 1
+        if 'transactions' not in donations_data[user_id]:
+            donations_data[user_id]['transactions'] = {}
+        donations_data[user_id]['transactions'][transaction_id] = amount
     else:
         donations_data[user_id] = {
             'username': user.username or user.full_name,
             'total': amount,
-            'count': 1
+            'count': 1,
+            'transactions': {transaction_id: amount}
         }
     
     save_donations(donations_data)
@@ -625,7 +627,7 @@ async def successful_payment(update: Update, context: ContextTypes.DEFAULT_TYPE)
         f"❤️ Thank you for your donation of {amount} stars!",
         reply_markup=donation_thanks_keyboard()
     )
-    logger.info(f"Successful donation: {amount} stars from {user.id}")
+    logger.info(f"Successful donation: {amount} stars from {user.id}, transaction_id: {transaction_id}")
 
 async def show_top_donors(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Показывает топ донатеров"""
@@ -681,10 +683,8 @@ async def show_top_donors(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 async def refund(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик команды возврата средств"""
-    user_id = str(update.effective_user.id)
-    
     # Проверка прав администратора
-    if user_id != ADMIN_USER_ID:
+    if str(update.effective_user.id) != ADMIN_USER_ID:
         await update.message.reply_text("🚫 You don't have permission to use this command.")
         return
     
@@ -695,29 +695,51 @@ async def refund(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     transaction_id = context.args[0]
     
+    # Поиск транзакции в данных
+    found = False
+    target_user_id = None
+    amount = 0
+    for uid, data in donations_data.items():
+        if 'transactions' in data and transaction_id in data['transactions']:
+            found = True
+            target_user_id = uid
+            amount = data['transactions'][transaction_id]
+            break
+    
+    if not found:
+        await update.message.reply_text(f"❌ Transaction {transaction_id} not found.")
+        return
+
+    # Выполняем возврат через API Telegram
+    url = f"https://api.telegram.org/bot{context.bot.token}/refundStarPayment"
+    payload = {
+        "user_id": int(target_user_id),
+        "telegram_payment_charge_id": transaction_id
+    }
+    
     try:
-        # Выполняем возврат средств
-        result = await context.bot.refund_star_payment(transaction_id)
-        
-        if result:
-            # Обновляем данные о донатах
-            for user_data in donations_data.values():
-                if transaction_id in user_data.get('transactions', []):
-                    user_data['total'] -= user_data['transactions'][transaction_id]
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=payload) as response:
+                result = await response.json()
+                if result.get('ok'):
+                    # Обновляем данные
+                    user_data = donations_data[target_user_id]
+                    user_data['total'] -= amount
                     user_data['count'] -= 1
                     del user_data['transactions'][transaction_id]
-                    break
-            
-            save_donations(donations_data)
-            
-            await update.message.reply_text(f"✅ Refund for transaction {transaction_id} was successful!")
-        else:
-            await update.message.reply_text(f"❌ Failed to process refund for {transaction_id}")
-            
-    except TelegramError as e:
-        await update.message.reply_text(f"⚠️ Error processing refund: {e.message}")
+                    
+                    # Если больше нет транзакций, удаляем пользователя?
+                    if user_data['count'] == 0:
+                        del donations_data[target_user_id]
+                    
+                    save_donations(donations_data)
+                    
+                    await update.message.reply_text(f"✅ Refund for transaction {transaction_id} was successful!")
+                else:
+                    error_description = result.get('description', 'Unknown error')
+                    await update.message.reply_text(f"❌ Failed to refund: {error_description}")
     except Exception as e:
-        await update.message.reply_text(f"⚠️ Unexpected error: {str(e)}")
+        await update.message.reply_text(f"⚠️ Error processing refund: {str(e)}")
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик всех callback-кнопок"""
@@ -745,6 +767,14 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             item_name = data[12:]
             await show_collectible_detail(update, context, item_name)
         elif data == "home":
+            # Удаляем текущее сообщение (например, сообщение с благодарностью за донат)
+            try:
+                await context.bot.delete_message(
+                    chat_id=query.message.chat_id,
+                    message_id=query.message.message_id
+                )
+            except TelegramError as e:
+                logger.error(f"Error deleting message in home: {e}")
             await show_main_menu(update, context)
         elif data == "back_nft":
             await handle_back_nft(update, context)
