@@ -190,7 +190,7 @@ COLLECTIBLE_ITEMS = {
     }
 }
 
-CONTACT_USER = "jamside_ay_lol"
+CONTACT_USER = "not_jammm"
 
 def main_menu_keyboard():
     return InlineKeyboardMarkup([
