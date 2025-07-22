@@ -201,9 +201,9 @@ GIFTS = {
             "All gifts are sent via a secure bot @GiftElfRobot.  "
         )
     },
-    "Epoor Dogg": {
+    "Snoop Dogg": {
         "description": (
-            "🐶 Epoor Dogg Collection 🐶  \n\n"
+            "🐶 Snoop Dogg Collection 🐶  \n\n"
             "Exclusive gifts from the legendary @snoopdogg:  \n\n"
             "• Model: Blonde 2%  \n"
             "• Background: Ranger Green 1.5%  \n"
