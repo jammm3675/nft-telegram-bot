@@ -16,7 +16,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-BOT_TOKEN = os.environ.get('BOT_TOKEN', '8010736258:AAF6_xDBDbWCGSACBLv8GI9o6WFWT21ZlBA')
+BOT_TOKEN = os.environ.get('BOT_TOKEN', '')
 
 NFT_COLLECTIONS = {
     "Gems Winter Store": {
