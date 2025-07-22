@@ -701,7 +701,7 @@ def main() -> None:
                 drop_pending_updates=True,
                 close_loop=False,
                 allowed_updates=Update.ALL_TYPES,
-                poll_interval=2.0
+                poll_interval=1.0
             )
             break
         except Conflict as e:
