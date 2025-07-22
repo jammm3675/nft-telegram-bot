@@ -4,7 +4,6 @@ import threading
 import asyncio
 import time
 import requests
-from io import BytesIO
 from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
@@ -190,13 +189,44 @@ COLLECTIBLE_ITEMS = {
     }
 }
 
+GIFTS = {
+    "Witch Hat": {
+        "description": (
+            "🧙‍♀️ Witch Hat Collection 🧙‍♀️  \n\n"
+            "Exclusive collectible gifts with unique characteristics:  \n"
+            "• Rare combinations of models, backgrounds and patterns  \n\n"
+            "Options:  \n"
+            "- Patchwork 0.5%  \n"
+            "- Roman Silver 1.5%  \n"
+            "- Coffin 2.4%  \n\n"
+            "All gifts are sent via a secure bot @GiftElfRobot.  "
+        )
+    },
+    "Epoor Dogg": {
+        "description": (
+            "🐶 Epoor Dogg Collection 🐶  \n\n"
+            "Exclusive gifts from the legendary @snoopdogg:  \n\n"
+            "• Model: Blonde 2%  \n"
+            "• Background: Ranger Green 1.5%  \n"
+            "• Pattern: Headphones 0.5%  \n\n"
+            "Each gift is a digital artifact with a history and a unique number.  \n"
+            "All gifts are sent via a secure bot @GiftElfRobot.  "
+        )
+    }
+}
+
 CONTACT_USER = "not_jammm"
 
 def main_menu_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("NFT", callback_data="nft_menu")], 
-        [InlineKeyboardButton("Stickers", callback_data="stickers_menu")],
-        [InlineKeyboardButton("Collectible Items", callback_data="collectible_menu")]
+        [
+            InlineKeyboardButton("NFT", callback_data="nft_menu"),
+            InlineKeyboardButton("Gifts", callback_data="gifts_menu")
+        ],
+        [
+            InlineKeyboardButton("Stickers", callback_data="stickers_menu"),
+            InlineKeyboardButton("Collectible Items", callback_data="collectible_menu")
+        ]
     ])
 
 def nft_menu_keyboard():
@@ -253,8 +283,25 @@ def collectible_detail_keyboard(item_name):
         ]
     ])
 
+def gifts_menu_keyboard():
+    buttons = []
+    for gift_name in GIFTS:
+        buttons.append([InlineKeyboardButton(gift_name, callback_data=f"gift_{gift_name}")])
+    buttons.append([InlineKeyboardButton("⬅️ Back", callback_data="home")])
+    return InlineKeyboardMarkup(buttons)
+
+def gift_detail_keyboard(gift_name):
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("💬 Buy", url=f"https://t.me/{CONTACT_USER}")
+        ],
+        [
+            InlineKeyboardButton("⬅️ Back", callback_data="gifts_menu"),
+            InlineKeyboardButton("🏠 Home", callback_data="home")
+        ]
+    ])
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Command handler /start"""
     user_data = context.user_data
     
     if 'base_message_id' in user_data:
@@ -272,32 +319,28 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await show_main_menu(update, context, is_new=True)
 
 async def cleanup_temp_messages(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
-    """Deletes all temporary messages and clears the list"""
-    user_data = context.user_data
-    if 'temp_messages' not in user_data:
+    if 'temp_messages' not in context.user_data:
         return
     
-    for msg_id in reversed(user_data['temp_messages']):
+    for msg_id in reversed(context.user_data['temp_messages']):
         try:
             await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
-            logger.info(f"Temporary message removed: {msg_id}")
-        except TelegramError as e:
-            if "message to delete not found" not in str(e).lower():
-                logger.error(f"Error deleting message {msg_id}: {e}")
+        except TelegramError:
+            pass
     
-    user_data['temp_messages'] = []
+    context.user_data['temp_messages'] = []
 
 async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_new=False) -> None:
-    """Shows the main menu"""
     chat_id = update.effective_chat.id
     user_data = context.user_data
     text = (
         "🏛 **Welcome to the Showcase!** 🏛\n\n"
-        "Discover rare NFTs, unique stickers, and collectible items that are ready to become part of your collection. All transactions are secure via @GiftElfRobot.  \n\n"
-        "🛍️ How to buy:  \n"
-        "1️⃣ Browse our collections below.  \n"
-        "2️⃣ Found something you like? DM us for purchase or exchange!  \n\n"
-        "⚠️ NFTs from the profile are put up for sale ONLY from 01.10.25 ⚠️"
+        "Discover rare NFTs, unique stickers, collectible items and exclusive gifts. "
+        "All transactions are secure via @GiftElfRobot.\n\n"
+        "🛍️ How to buy:\n"
+        "1️⃣ Browse our collections below\n"
+        "2️⃣ Found something? DM us for purchase/exchange!\n\n"
+        "⚠️ NFTs from profile available ONLY after 01.10.25 ⚠️"
     )
     
     await cleanup_temp_messages(context, chat_id)
@@ -310,7 +353,6 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
             parse_mode="Markdown"
         )
         user_data['base_message_id'] = message.message_id
-        logger.info(f"New main message created: {message.message_id}")
     else:
         try:
             await context.bot.edit_message_text(
@@ -320,23 +362,16 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
                 reply_markup=main_menu_keyboard(),
                 parse_mode="Markdown"
             )
-            logger.info(f"Main message updated: {user_data['base_message_id']}")
-        except BadRequest as e:
-            if "message is not modified" in str(e).lower():
-                logger.info("The message does not require changes (main menu)")
-            else:
-                logger.error(f"Main menu error: {e}")
-                message = await context.bot.send_message(
-                    chat_id=chat_id,
-                    text=text,
-                    reply_markup=main_menu_keyboard(),
-                    parse_mode="Markdown"
-                )
-                user_data['base_message_id'] = message.message_id
-                logger.info(f"New main message created due to error: {message.message_id}")
+        except BadRequest:
+            message = await context.bot.send_message(
+                chat_id=chat_id,
+                text=text,
+                reply_markup=main_menu_keyboard(),
+                parse_mode="Markdown"
+            )
+            user_data['base_message_id'] = message.message_id
 
 async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Shows the NFT menu"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat_id
@@ -352,16 +387,10 @@ async def show_nft_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             reply_markup=nft_menu_keyboard(),
             parse_mode="Markdown"
         )
-        logger.info(f"NFT menu shown in message {user_data['base_message_id']}")
-    except BadRequest as e:
-        if "message is not modified" in str(e).lower():
-            logger.info("The NFT message does not require modifications")
-        else:
-            logger.error(f"NFT menu error: {e}")
-            await show_main_menu(update, context, is_new=True)
+    except BadRequest:
+        await show_main_menu(update, context, is_new=True)
 
 async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nft_name: str) -> None:
-    """Shows NFT details"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat_id
@@ -379,23 +408,17 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
             reply_markup=nft_detail_keyboard(nft_name),
             parse_mode="Markdown"
         )
-        
         user_data.setdefault('temp_messages', []).append(message.message_id)
-        logger.info(f"Temporary NFT message created: {message.message_id}")
-        
-    except Exception as e:
-        logger.error(f"Ошибка деталей NFT: {e}")
+    except Exception:
         message = await context.bot.send_message(
             chat_id=chat_id,
-            text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Image is temporarily unavailable",
+            text=f"✨ **{nft_name}** ✨\n\n{nft['description']}\n\n✅ Ready for sale/exchange\n\n⚠️ Image unavailable",
             reply_markup=nft_detail_keyboard(nft_name),
             parse_mode="Markdown"
         )
         user_data.setdefault('temp_messages', []).append(message.message_id)
-        logger.info(f"NFT text temporary message created: {message.message_id}")
 
 async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Shows the sticker menu"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat_id
@@ -411,16 +434,10 @@ async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
             reply_markup=stickers_menu_keyboard(),
             parse_mode="Markdown"
         )
-        logger.info(f"Showing sticker menu in message {user_data['base_message_id']}")
-    except BadRequest as e:
-        if "message is not modified" in str(e).lower():
-            logger.info("The sticker message does not require any changes.")
-        else:
-            logger.error(f"Sticker menu error: {e}")
-            await show_main_menu(update, context, is_new=True)
+    except BadRequest:
+        await show_main_menu(update, context, is_new=True)
 
 async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, sticker_name: str) -> None:
-    """Shows sticker pack details"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat_id
@@ -439,17 +456,10 @@ async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE
             reply_markup=sticker_detail_keyboard(sticker_name),
             parse_mode="Markdown"
         )
-        logger.info(f"Showing sticker details in message {user_data['base_message_id']}")
-    except BadRequest as e:
-        if "message is not modified" in str(e).lower():
-            logger.info("The sticker details message does not require any changes")
-        else:
-            logger.error(f"Sticker details error: {e}")
-            await show_main_menu(update, context, is_new=True)
+    except BadRequest:
+        await show_main_menu(update, context, is_new=True)
 
-# Новые функции для раздела Collectible Items
 async def show_collectible_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Shows the collectible items menu"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat_id
@@ -465,16 +475,10 @@ async def show_collectible_menu(update: Update, context: ContextTypes.DEFAULT_TY
             reply_markup=collectible_menu_keyboard(),
             parse_mode="Markdown"
         )
-        logger.info(f"Collectible menu shown in message {user_data['base_message_id']}")
-    except BadRequest as e:
-        if "message is not modified" in str(e).lower():
-            logger.info("The collectible menu does not require changes")
-        else:
-            logger.error(f"Collectible menu error: {e}")
-            await show_main_menu(update, context, is_new=True)
+    except BadRequest:
+        await show_main_menu(update, context, is_new=True)
 
 async def show_collectible_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, item_name: str) -> None:
-    """Shows collectible item details"""
     query = update.callback_query
     await query.answer()
     chat_id = query.message.chat_id
@@ -493,25 +497,57 @@ async def show_collectible_detail(update: Update, context: ContextTypes.DEFAULT_
             reply_markup=collectible_detail_keyboard(item_name),
             parse_mode="Markdown"
         )
-        logger.info(f"Showing collectible details in message {user_data['base_message_id']}")
-    except BadRequest as e:
-        if "message is not modified" in str(e).lower():
-            logger.info("The collectible details message does not require changes")
-        else:
-            logger.error(f"Collectible details error: {e}")
-            await show_main_menu(update, context, is_new=True)
+    except BadRequest:
+        await show_main_menu(update, context, is_new=True)
 
-async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """NFT Back Button Handler"""
+async def show_gifts_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
+    chat_id = query.message.chat_id
+    user_data = context.user_data
     
+    await cleanup_temp_messages(context, chat_id)
+    
+    try:
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=user_data['base_message_id'],
+            text="🎁 **Exclusive Gifts**\n\nSelect a gift collection:",
+            reply_markup=gifts_menu_keyboard(),
+            parse_mode="Markdown"
+        )
+    except BadRequest:
+        await show_main_menu(update, context, is_new=True)
+
+async def show_gift_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, gift_name: str) -> None:
+    query = update.callback_query
+    await query.answer()
+    chat_id = query.message.chat_id
+    user_data = context.user_data
+    
+    await cleanup_temp_messages(context, chat_id)
+    
+    gift_data = GIFTS[gift_name]
+    text = f"✨ **{gift_name}** ✨\n\n{gift_data['description']}\n"
+    
+    try:
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=user_data['base_message_id'],
+            text=text,
+            reply_markup=gift_detail_keyboard(gift_name),
+            parse_mode="Markdown"
+        )
+    except BadRequest:
+        await show_main_menu(update, context, is_new=True)
+
+async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer()
     await cleanup_temp_messages(context, query.message.chat_id)
-    
     await show_nft_menu(update, context)
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Обработчик всех callback-кнопок"""
     query = update.callback_query
     data = query.data
 
@@ -520,25 +556,26 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await show_nft_menu(update, context)
         elif data == "stickers_menu":
             await show_stickers_menu(update, context)
-        elif data == "collectible_menu":  # Новый обработчик
+        elif data == "collectible_menu":
             await show_collectible_menu(update, context)
+        elif data == "gifts_menu":
+            await show_gifts_menu(update, context)
         elif data.startswith("nft_"):
-            nft_name = data[4:]
-            await show_nft_detail(update, context, nft_name)
+            await show_nft_detail(update, context, data[4:])
         elif data.startswith("sticker_"):
-            sticker_name = data[8:]
-            await show_sticker_detail(update, context, sticker_name)
-        elif data.startswith("collectible_"):  # Новый обработчик
-            item_name = data[12:]
-            await show_collectible_detail(update, context, item_name)
+            await show_sticker_detail(update, context, data[8:])
+        elif data.startswith("collectible_"):
+            await show_collectible_detail(update, context, data[12:])
+        elif data.startswith("gift_"):
+            await show_gift_detail(update, context, data[5:])
         elif data == "home":
             await show_main_menu(update, context)
         elif data == "back_nft":
             await handle_back_nft(update, context)
     except Exception as e:
-        logger.error(f"Error in button handler: {e}")
+        logger.error(f"Button handler error: {e}")
         try:
-            await query.answer("⚠️ An error occurred, please try again later")
+            await query.answer("⚠️ Error, please try later")
         except:
             pass
 
@@ -547,7 +584,7 @@ def run_flask_server():
 
     @app.route('/')
     def home():
-        return "🤖 Bot is running! UptimeRobot monitoring active."
+        return "🤖 Bot is running"
 
     @app.route('/health')
     def health_check():
@@ -557,66 +594,40 @@ def run_flask_server():
     app.run(host='0.0.0.0', port=port)
 
 def keep_alive():
-    """Regularly sends requests to the server so that the bot does not disconnect"""
     while True:
         try:
             server_url = os.environ.get('RENDER_EXTERNAL_URL', 'http://localhost:10000')
-            health_url = f"{server_url}/health"
-            
-            response = requests.get(health_url, timeout=10)
-            logger.info(f"Wake up request sent! Status: {response.status_code}")
-        except Exception as e:
-            logger.error(f"Error while waking up: {e}")
-        
+            requests.get(f"{server_url}/health", timeout=10)
+        except Exception:
+            pass
         time.sleep(14 * 60)
 
 def main() -> None:
     if not BOT_TOKEN:
-        logger.error("❌ BOT_TOKEN not installed!")
+        logger.error("❌ BOT_TOKEN missing!")
         return
 
     server_thread = threading.Thread(target=run_flask_server)
     server_thread.daemon = True
     server_thread.start()
-    logger.info(f"🌐 HTTP server running on port {os.environ.get('PORT', 10000)}")
 
     if os.environ.get('RENDER'):
-        wakeup_thread = threading.Thread(target=keep_alive)
-        wakeup_thread.daemon = True
-        wakeup_thread.start()
-        logger.info("🔔Keep-alive function started (interval: 14 minutes)")
-    else:
-        logger.info("🖥️ Local Launch - Keep Alive feature disabled")
+        threading.Thread(target=keep_alive, daemon=True).start()
 
     application = Application.builder().token(BOT_TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_handler))
 
-    logger.info("🤖 Бот запущен! Ожидание сообщений...")
-    
     max_retries = 5
-    retry_delay = 10
-    
     for attempt in range(max_retries):
         try:
-            application.run_polling(
-                drop_pending_updates=True,
-                close_loop=False,
-                allowed_updates=Update.ALL_TYPES,
-                poll_interval=2.0
-            )
+            application.run_polling(drop_pending_updates=True)
             break
         except Conflict as e:
-            logger.error(f"Conflict error (attempt {attempt+1}/{max_retries}): {e}")
             if attempt < max_retries - 1:
-                logger.info(f"Retrying in {retry_delay} seconds...")
-                time.sleep(retry_delay)
-                retry_delay *= 2
+                time.sleep(10)
             else:
-                logger.error("Max retries exceeded. Bot stopped.")
-        except Exception as e:
-            logger.error(f"Unexpected error: {e}")
-            break
+                logger.error("Max retries exceeded")
 
 if __name__ == "__main__":
     main()
