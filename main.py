@@ -198,6 +198,7 @@ GIFTS = {
             "- Patchwork 0.5%  \n"
             "- Roman Silver 1.5%  \n"
             "- Coffin 2.4%  \n\n"
+            "Price from 5 Ton per one  \n"
             "All gifts are sent via a secure bot @GiftElfRobot.  "
         )
     },
