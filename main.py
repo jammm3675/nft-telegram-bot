@@ -1,7 +1,6 @@
 import logging
 import os
 import threading
-import asyncio
 import time
 import requests
 from flask import Flask
@@ -193,7 +192,7 @@ GIFTS = {
     "Witch Hat": {
         "description": (
             "🧙‍♀️ Witch Hat Collection 🧙‍♀️  \n\n"
-            "Exclusive collectible gifts with unique characteristics:  \n"
+            "Exclusive collectible gifts with unique characteristics:  \n\n"
             "• Rare combinations of models, backgrounds and patterns  \n\n"
             "Options:  \n"
             "- Patchwork 0.5%  \n"
@@ -340,7 +339,6 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, is_
         "🛍️ How to buy:\n"
         "1️⃣ Browse our collections below\n"
         "2️⃣ Found something? DM us for purchase/exchange!\n\n"
-        "⚠️ NFTs from profile available ONLY after 01.10.25 ⚠️"
     )
     
     await cleanup_temp_messages(context, chat_id)
@@ -607,8 +605,7 @@ def main() -> None:
         logger.error("❌ BOT_TOKEN missing!")
         return
 
-    server_thread = threading.Thread(target=run_flask_server)
-    server_thread.daemon = True
+    server_thread = threading.Thread(target=run_flask_server, daemon=True)
     server_thread.start()
 
     if os.environ.get('RENDER'):
@@ -621,13 +618,20 @@ def main() -> None:
     max_retries = 5
     for attempt in range(max_retries):
         try:
-            application.run_polling(drop_pending_updates=True)
+            application.run_polling(
+                drop_pending_updates=True,
+                allowed_updates=Update.ALL_TYPES,
+                poll_interval=0.5
+            )
             break
         except Conflict as e:
             if attempt < max_retries - 1:
-                time.sleep(10)
+                time.sleep(2)
             else:
                 logger.error("Max retries exceeded")
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            break
 
 if __name__ == "__main__":
     main()
