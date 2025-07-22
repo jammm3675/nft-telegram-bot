@@ -417,138 +417,18 @@ async def show_nft_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, nf
         )
         user_data.setdefault('temp_messages', []).append(message.message_id)
 
-async def show_stickers_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    await query.answer()
-    chat_id = query.message.chat_id
-    user_data = context.user_data
-    
-    await cleanup_temp_messages(context, chat_id)
-    
-    try:
-        await context.bot.edit_message_text(
-            chat_id=chat_id,
-            message_id=user_data['base_message_id'],
-            text="🎭 **Stickerpacks**\n\nSelect a sticker collection:",
-            reply_markup=stickers_menu_keyboard(),
-            parse_mode="Markdown"
-        )
-    except BadRequest:
-        await show_main_menu(update, context, is_new=True)
-
-async def show_sticker_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, sticker_name: str) -> None:
-    query = update.callback_query
-    await query.answer()
-    chat_id = query.message.chat_id
-    user_data = context.user_data
-    
-    await cleanup_temp_messages(context, chat_id)
-    
-    sticker_data = STICKER_COLLECTIONS[sticker_name]
-    text = f"✨ **{sticker_name}** ✨\n\n{sticker_data['description']}\n"
-    
-    try:
-        await context.bot.edit_message_text(
-            chat_id=chat_id,
-            message_id=user_data['base_message_id'],
-            text=text,
-            reply_markup=sticker_detail_keyboard(sticker_name),
-            parse_mode="Markdown"
-        )
-    except BadRequest:
-        await show_main_menu(update, context, is_new=True)
-
-async def show_collectible_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    await query.answer()
-    chat_id = query.message.chat_id
-    user_data = context.user_data
-    
-    await cleanup_temp_messages(context, chat_id)
-    
-    try:
-        await context.bot.edit_message_text(
-            chat_id=chat_id,
-            message_id=user_data['base_message_id'],
-            text="⚱️ **Collectible Items**\n\nSelect a category:",
-            reply_markup=collectible_menu_keyboard(),
-            parse_mode="Markdown"
-        )
-    except BadRequest:
-        await show_main_menu(update, context, is_new=True)
-
-async def show_collectible_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, item_name: str) -> None:
-    query = update.callback_query
-    await query.answer()
-    chat_id = query.message.chat_id
-    user_data = context.user_data
-    
-    await cleanup_temp_messages(context, chat_id)
-    
-    item_data = COLLECTIBLE_ITEMS[item_name]
-    text = f"✨ **{item_name}** ✨\n\n{item_data['description']}\n"
-    
-    try:
-        await context.bot.edit_message_text(
-            chat_id=chat_id,
-            message_id=user_data['base_message_id'],
-            text=text,
-            reply_markup=collectible_detail_keyboard(item_name),
-            parse_mode="Markdown"
-        )
-    except BadRequest:
-        await show_main_menu(update, context, is_new=True)
-
-async def show_gifts_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    await query.answer()
-    chat_id = query.message.chat_id
-    user_data = context.user_data
-    
-    await cleanup_temp_messages(context, chat_id)
-    
-    try:
-        await context.bot.edit_message_text(
-            chat_id=chat_id,
-            message_id=user_data['base_message_id'],
-            text="🎁 **Exclusive Gifts**\n\nSelect a gift collection:",
-            reply_markup=gifts_menu_keyboard(),
-            parse_mode="Markdown"
-        )
-    except BadRequest:
-        await show_main_menu(update, context, is_new=True)
-
-async def show_gift_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, gift_name: str) -> None:
-    query = update.callback_query
-    await query.answer()
-    chat_id = query.message.chat_id
-    user_data = context.user_data
-    
-    await cleanup_temp_messages(context, chat_id)
-    
-    gift_data = GIFTS[gift_name]
-    text = f"✨ **{gift_name}** ✨\n\n{gift_data['description']}\n"
-    
-    try:
-        await context.bot.edit_message_text(
-            chat_id=chat_id,
-            message_id=user_data['base_message_id'],
-            text=text,
-            reply_markup=gift_detail_keyboard(gift_name),
-            parse_mode="Markdown"
-        )
-    except BadRequest:
-        await show_main_menu(update, context, is_new=True)
-
+# Восстановленная функциональность для кнопки Back в NFT
 async def handle_back_nft(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
-    await cleanup_temp_messages(context, query.message.chat_id)
+    chat_id = query.message.chat_id
+    user_data = context.user_data
+    
+    # Очищаем временные сообщения (детали NFT)
+    await cleanup_temp_messages(context, chat_id)
+    
+    # Показываем меню NFT вместо главного меню
     await show_nft_menu(update, context)
-
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    data = query.data
 
     try:
         if data == "nft_menu":
@@ -570,7 +450,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         elif data == "home":
             await show_main_menu(update, context)
         elif data == "back_nft":
-            await handle_back_nft(update, context)
+            await handle_back_nft(update, context)  # Используем восстановленный обработчик
     except Exception as e:
         logger.error(f"Button handler error: {e}")
         try:
