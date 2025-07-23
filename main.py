@@ -195,16 +195,16 @@ GIFTS = {
             "Exclusive collectible gifts with unique characteristics:  \n\n"
             "• Rare combinations of models, backgrounds and patterns  \n\n"
             "Options:  \n"
-            "- Patchwork 0.5%  \n"
-            "- Roman Silver 1.5%  \n"
-            "- Coffin 2.4%  \n\n"
-            "Price from 5 Ton per one  \n"
+            "- [Patchwork 0.5%](t.me/nft/WitchHat-49198)  \n"
+            "- [Old Ochre 1.5%](t.me/nft/WitchHat-4941)  \n"
+            "- [Vintage 1.5%](t.me/nft/WitchHat-50026)  \n\n"
+            "🚀 Price from 5 Ton per one  \n\n"
             "All gifts are sent via a secure bot @GiftElfRobot.  "
         )
     },
-    "Snoop Dogg": {
+    "Snoop Dogg Collection": {
         "description": (
-            "🐶 Snoop Dogg Collection 🐶  \n\n"
+            "🐶 [Snoop Dogg](t.me/nft/SnoopDogg-65838) 🐶  \n\n"
             "Exclusive gifts from the legendary @snoopdogg:  \n\n"
             "- Model: Blonde 2%  \n"
             "- Background: Ranger Green 1.5%  \n"
