@@ -171,6 +171,13 @@ COLLECTIBLE_ITEMS = {
             "Not Games - It’s probably Steam for mobile games with (finally) updated interface.  "
         )
     },
+    "Not Pixel": {
+        "link": "https://t.me/notgames_bot/profile?startapp=786080766",
+        "description": (
+            "🌎 Big Bang 🌎 - the personification of anarchy and madness in the pixel world **  \n\n"
+            "How Earth started. And that show. \n"
+        )
+    },
     "Void": {
         "link": "https://t.me/notgames_bot/profile?startapp=786080766",
         "description": (
@@ -178,10 +185,12 @@ COLLECTIBLE_ITEMS = {
             "Claim these legendary items before they disappear into the void! Each item unlocks  \n"
             "unique opportunities in the expanding Void universe.  \n\n"
             "Why collectors compete for them:  \n"
-            "- Psychedelic #300: the rarest skin in the game, dedicated to the birthday of Not Coin  \n"
-            "- Beta #9962: an indicator of the status of one of the first through a simple skin  \n"
-            "- First Flight #605: one of the First Card  \n"
-            "- MEME/FOOD/BADGE: cases with exclusive skins  \n\n"
+            "- Psychedelic #300: The rarest skin in the game, dedicated to the birthday of Not Coin  \n"
+            "- Beta #9962: An indicator of the status of one of the first through a simple skin  \n"
+            "- First Flight #605: One of the First Card  \n"
+            "- Not Stupid #5478: NOT STUPID. NOT STUPID.  \n"
+            "- Lovepunch #762: Hits you with pureaffection. Then again.  \n"
+            "- Looped Love #2895/5182/5388/5389: Stuckin a love loop. And now you are too.  \n\n"
             "These aren't just items - they're pieces of digital history.  \n"
             "Complete your collection today!  "
         )
@@ -194,7 +203,7 @@ GIFTS = {
             "🧙‍♀️ Witch Hat Collection 🧙‍♀️  \n\n"
             "Exclusive collectible gifts with unique characteristics:  \n\n"
             "• Rare combinations of models, backgrounds and patterns  \n\n"
-            "Models:  \n"
+            "Select an item for detailed information: \n"
             "- [Patchwork](t.me/nft/WitchHat-49198)  \n"
             "- [Old Ochre](t.me/nft/WitchHat-4941)  \n"
             "- [Vintage](t.me/nft/WitchHat-50026)  \n\n"
@@ -205,11 +214,11 @@ GIFTS = {
     "Snoop Dogg Collection": {
         "description": (
             "🐶 [Snoop Dogg](t.me/nft/SnoopDogg-65838) 🐶  \n\n"
-            "Exclusive gifts from the legendary @snoopdogg:  \n\n"
+            "• Exclusive gifts from the legendary @snoopdogg:  \n\n"
             "- Model: Blonde 2%  \n"
             "- Background: Ranger Green 1.5%  \n"
             "- Pattern: Headphones 0.5%  \n\n"
-            "Each gift is a digital artifact with a history and a unique number.  \n"
+            "Each gift is a digital artifact with a history and a unique number.  \n\n"
             "All gifts are sent via a secure bot @GiftElfRobot.  "
         )
     }
@@ -701,7 +710,7 @@ def main() -> None:
                 drop_pending_updates=True,
                 close_loop=False,
                 allowed_updates=Update.ALL_TYPES,
-                poll_interval=1.0
+                poll_interval=1.35
             )
             break
         except Conflict as e:
