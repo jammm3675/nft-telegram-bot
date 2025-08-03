@@ -102,21 +102,8 @@ STICKER_COLLECTIONS = {
             "Doge community on Telegram! Show off your status with these ultra-rare digital assets:  \n\n"
             "•Bow Tie #4780 - Absolutely Classic and Elegant  \n"
             "•One Piece #6673 - Iconic Character from the eponymous production  \n"
-            "•Panama Hat #1417 - Summer Classic  \n"
-            "•Kamikaze #4812 - Favorite Among Collectors of Original Items  \n\n"
+            "•Panama Hat #1417 - Summer Classic  \n\n"
             "Meet Dogs and get ready to meet your new best friend who’s always got your back (and your snacks)!  "
-        )
-    },
-    "Dogs Rewards": {
-        "sticker_url": "https://t.me/sticker_bot/?startapp=tid_Nzg2MDgwNzY2",
-        "description": (
-            "•Full Dig #4453 - The Ultimate Miner's Trophy** ⛏️\n\n" 
-            "This isn't just a sticker - it's proof of your dedication to the Doge ecosystem!  \n" 
-            "Awarded only to the most committed community members and early supporters.  \n\n" 
-            "Why collectors value this above all:  \n" 
-            "- Rare sticker in the Dogs universe  \n" 
-            "- Grants special mining bonuses  \n" 
-            "- Recognized status in all Doge games  " 
         )
     },
     "Lost Dogs": {
