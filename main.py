@@ -177,12 +177,10 @@ async def main():
     port = int(os.getenv('PORT', 8080))
     site = web.TCPSite(runner, '0.0.0.0', port)
 
-    # Initialize the application and then start both servers
+    # Initialize the application, then start polling and the web server
     await application.initialize()
+    await application.updater.start_polling(drop_pending_updates=True)
     await site.start()
-
-    # Start polling for Telegram updates
-    await application.updater.start_polling()
 
     # Keep the script running
     await asyncio.Event().wait()
