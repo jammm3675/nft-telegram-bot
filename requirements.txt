@@ -1,5 +1,7 @@
-python-telegram-bot==21.1.1
-flask==3.0.2
-requests
-gunicorn
+python-telegram-bot
+asyncio
 aiohttp
+psycopg2-binary
+python-dotenv
+asyncpg
+flask
