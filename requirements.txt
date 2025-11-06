@@ -2,4 +2,3 @@ python-telegram-bot
 aiohttp
 python-dotenv
 asyncpg
-flask

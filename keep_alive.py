@@ -1,15 +1,12 @@
-from flask import Flask
-from threading import Thread
+import os
+from aiohttp import web
 
-app = Flask('')
+async def handle(request):
+    """Simple handler that returns a 200 OK status."""
+    return web.Response(text="I'm alive")
 
-@app.route('/')
-def home():
-    return "I'm alive"
-
-def run():
-  app.run(host='0.0.0.0',port=8080)
-
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
+async def create_keep_alive_app():
+    """Creates the aiohttp web application."""
+    app = web.Application()
+    app.add_routes([web.get('/', handle)])
+    return app
