@@ -16,80 +16,60 @@ from keep_alive import create_keep_alive_app
 load_dotenv()
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-# --- Bot Handlers (No changes from previous version) ---
+# --- Bot Handlers ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handler for the /start command."""
     user = update.effective_user
     db_pool = context.bot_data['db_pool']
-
     await db.get_or_create_user(db_pool, user.id, user.username, user.first_name)
-
     text, reply_markup = texts.get_start_menu()
     await update.message.reply_text(text, reply_markup=reply_markup, parse_mode='MarkdownV2')
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handler for all button presses."""
     query = update.callback_query
     await query.answer()
-
     user = update.effective_user
     db_pool = context.bot_data['db_pool']
     ton_api = context.bot_data['ton_api']
     user_db_id = await db.get_or_create_user(db_pool, user.id, user.username, user.first_name)
-
     data = query.data
-
     try:
         if data == 'main_menu':
             text, reply_markup = texts.get_start_menu()
             await query.edit_message_text(text, reply_markup=reply_markup, parse_mode='MarkdownV2')
-
         elif data == 'wallets_menu':
             await show_wallets_menu(query, db_pool, user_db_id)
-
         elif data == 'add_wallet':
             text, reply_markup = texts.get_add_wallet_prompt()
             await db.set_user_state(db_pool, user.id, 'awaiting_wallet_address')
             await query.edit_message_text(text, reply_markup=reply_markup, parse_mode='MarkdownV2')
-
         elif data == 'remove_wallet_menu':
             wallets = await db.get_user_wallets(db_pool, user_db_id)
             text, reply_markup = texts.get_remove_wallet_menu(wallets)
             await query.edit_message_text(text, reply_markup=reply_markup, parse_mode='MarkdownV2')
-
         elif data.startswith('confirm_remove_'):
             wallet_address = data.replace('confirm_remove_', '')
             text, reply_markup = texts.get_confirm_remove_wallet_menu(wallet_address)
             await query.edit_message_text(text, reply_markup=reply_markup, parse_mode='MarkdownV2')
-
         elif data.startswith('remove_'):
             wallet_address = data.replace('remove_', '')
             await db.remove_wallet(db_pool, user_db_id, wallet_address)
             await show_wallets_menu(query, db_pool, user_db_id)
-
         elif data == 'help_menu':
             text, reply_markup = texts.get_help_menu()
             await query.edit_message_text(text, reply_markup=reply_markup, parse_mode='MarkdownV2')
-
         elif data == 'my_nft_menu' or data == 'my_nft_menu_refresh':
             context.user_data.pop('nfts', None)
             await show_my_nfts_menu(query, db_pool, ton_api, user_db_id, context)
-
         elif data.startswith('nft_page_'):
             page = int(data.split('_')[-1])
             await show_my_nfts_menu(query, db_pool, ton_api, user_db_id, context, page=page)
-
         elif data.startswith('share_'):
             nft_address = data.replace('share_', '')
             await send_share_card(query.message, ton_api, nft_address, user.username)
-
         elif data == 'noop':
             pass
-
     except BadRequest as e:
-        if "Message is not modified" in str(e):
-            pass
-        else:
+        if "Message is not modified" not in str(e):
             print(f"BadRequest error in button_handler: {e}")
 
 async def share_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -139,7 +119,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await update.message.reply_text("❌ Неверный формат адреса кошелька. Попробуйте еще раз.")
 
-# --- Helper Functions (No changes from previous version) ---
+# --- Helper Functions ---
 async def send_share_card(message, ton_api, nft_address, owner_username):
     nft_data = await ton_api.get_nft_details(nft_address)
     if not nft_data:
@@ -173,9 +153,7 @@ async def show_my_nfts_menu(query, db_pool, ton_api, user_db_id, context, page=0
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode='MarkdownV2')
 
 # --- Application Setup ---
-
 async def post_init(application: Application):
-    """Initializes the database pool and other services."""
     db_pool = await db.create_pool()
     await db.init_db(db_pool)
     application.bot_data['db_pool'] = db_pool
@@ -183,8 +161,6 @@ async def post_init(application: Application):
 
 async def main():
     """Main function to set up and run the bot and web server."""
-
-    # Set up the Telegram bot application
     application = Application.builder().token(TELEGRAM_BOT_TOKEN).post_init(post_init).build()
 
     # Add handlers
@@ -203,6 +179,7 @@ async def main():
 
     # Run application and web server concurrently
     async with application:
+        await application.initialize() # Wait for post_init to complete
         await application.start()
         await site.start()
         await application.updater.start_polling()
