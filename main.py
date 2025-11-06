@@ -159,9 +159,30 @@ async def post_init(application: Application):
     application.bot_data['db_pool'] = db_pool
     application.bot_data['ton_api'] = TONAPIService()
 
-async def main():
-    """Main function to set up and run the bot and web server."""
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).post_init(post_init).build()
+async def post_start(application: Application):
+    """Starts the aiohttp web server."""
+    keep_alive_app = await create_keep_alive_app()
+    runner = web.AppRunner(keep_alive_app)
+    await runner.setup()
+    port = int(os.getenv('PORT', 8080))
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    application.bot_data['aiohttp_runner'] = runner
+
+async def post_stop(application: Application):
+    """Stops the aiohttp web server."""
+    await application.bot_data['aiohttp_runner'].cleanup()
+
+def main():
+    """Main function to set up and run the bot."""
+    application = (
+        Application.builder()
+        .token(TELEGRAM_BOT_TOKEN)
+        .post_init(post_init)
+        .post_start(post_start)
+        .post_stop(post_stop)
+        .build()
+    )
 
     # Add handlers
     application.add_handler(CommandHandler("start", start))
@@ -170,20 +191,8 @@ async def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
     application.add_handler(InlineQueryHandler(inline_query_handler))
     
-    # --- aiohttp Web Server Setup ---
-    keep_alive_app = await create_keep_alive_app()
-    runner = web.AppRunner(keep_alive_app)
-    await runner.setup()
-    port = int(os.getenv('PORT', 8080))
-    site = web.TCPSite(runner, '0.0.0.0', port)
-
-    # Initialize the application, then start polling and the web server
-    await application.initialize()
-    await application.updater.start_polling(drop_pending_updates=True)
-    await site.start()
-
-    # Keep the script running
-    await asyncio.Event().wait()
+    # Run the bot
+    application.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
