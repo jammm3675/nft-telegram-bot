@@ -20,19 +20,24 @@ async def get_pool():
         return None
 
 async def setup_database():
-    """Sets up the database tables if they don't exist."""
+    """Sets up and migrates the database tables."""
     pool = await get_pool()
     if pool:
         async with pool.acquire() as connection:
-            # Create users table
+            # Create users table if it doesn't exist
             await connection.execute('''
                 CREATE TABLE IF NOT EXISTS users (
                     id BIGINT PRIMARY KEY,
                     username VARCHAR(255),
-                    first_name VARCHAR(255),
-                    last_name VARCHAR(255)
+                    first_name VARCHAR(255)
                 );
             ''')
+
+            # Add last_name column if it doesn't exist (for migration)
+            await connection.execute('''
+                ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR(255);
+            ''')
+
             # Create wallets table
             await connection.execute('''
                 CREATE TABLE IF NOT EXISTS wallets (
@@ -47,6 +52,7 @@ async def setup_database():
 async def add_user(pool, user_id: int, username: str, first_name: str, last_name: str):
     """Adds or updates a user in the database."""
     async with pool.acquire() as connection:
+        # last_name can be None, which will be stored as NULL
         await connection.execute(
             """
             INSERT INTO users (id, username, first_name, last_name)
@@ -57,9 +63,9 @@ async def add_user(pool, user_id: int, username: str, first_name: str, last_name
                 last_name = EXCLUDED.last_name;
             """,
             user_id,
-            username,
-            first_name,
-            last_name,
+            username or '',
+            first_name or '',
+            last_name or '',
         )
 
 async def add_wallet(pool, user_id: int, address: str) -> bool:
