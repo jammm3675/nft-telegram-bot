@@ -1,4 +1,5 @@
 python-telegram-bot
-aiohttp
-python-dotenv
 asyncpg
+aiohttp
+Flask
+uvicorn
