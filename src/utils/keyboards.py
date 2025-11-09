@@ -21,13 +21,25 @@ def wallets_menu_keyboard(wallets: list) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 def nft_list_keyboard(current_page: int, total_pages: int) -> InlineKeyboardMarkup:
-    """Returns the keyboard for the NFT list."""
+    """Returns the keyboard for the NFT list with boundary checks."""
+    # current_page is 1-based, page_index is 0-based
+    page_index = current_page - 1
+
+    pagination_row = []
+
+    # Add 'previous' button if not on the first page
+    if page_index > 0:
+        pagination_row.append(InlineKeyboardButton("◀️", callback_data=f'prev_nft_page_{page_index - 1}'))
+
+    # Add page info button
+    pagination_row.append(InlineKeyboardButton(f"{current_page}/{total_pages}", callback_data='page_info'))
+
+    # Add 'next' button if not on the last page
+    if page_index < total_pages - 1:
+        pagination_row.append(InlineKeyboardButton("▶️", callback_data=f'next_nft_page_{page_index + 1}'))
+
     keyboard = [
-        [
-            InlineKeyboardButton("◀️", callback_data=f'prev_nft_page_{current_page - 1}'),
-            InlineKeyboardButton(f"{current_page}/{total_pages}", callback_data='page_info'),
-            InlineKeyboardButton("▶️", callback_data=f'next_nft_page_{current_page + 1}'),
-        ],
+        pagination_row,
         [InlineKeyboardButton(get_text('update'), callback_data='update_nfts')],
         [InlineKeyboardButton(get_text('back_to_menu'), callback_data='main_menu')],
     ]
